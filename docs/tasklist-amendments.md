@@ -2,6 +2,15 @@
 
 This file records task-state changes and new stable IDs discovered after the original master backlog was committed. `docs/project-tracker.md` is authoritative for current status. These amendments must be folded into `docs/tasklist.md` during backlog normalization without renumbering existing IDs.
 
+## Naming gate
+
+- [ ] **M0-003 [P1]** Select project name after conflict/domain/repository/trademark screening — **IN PROGRESS / replacement required**.  
+  **Finding:** preliminary screening on 13 August 2026 found an unrelated active school-software product already using the exact **ScolaOS** name at `scolaos.com`.  
+  **Decision:** ScolaOS is rejected as the final public product brand and retained only as a temporary repository/engineering codename.  
+  **Evidence:** `docs/brand-screening.md`, `docs/decision-amendments.md`.  
+  **Still required:** select a replacement and complete product/domain/repository/package/app-store screening plus appropriate formal trademark clearance before public 1.0 branding.  
+  **Guardrail:** do not create new final domains, public package namespaces, app-store assets, signing identities, launch assets or permanent wordmark branding under ScolaOS.
+
 ## Completed repository/tooling tasks
 
 - [x] **M0-005 [P0]** Initial threat model. Evidence: `docs/threat-model.md`.
@@ -48,4 +57,4 @@ This file records task-state changes and new stable IDs discovered after the ori
 
 ## Open-source packaging note
 
-`M6-091 LICENSE` remains open for production-release readiness. The repository declares AGPL-3.0-only; release packaging must include the canonical license text verbatim from an authoritative distribution.
+`M6-091 LICENSE` remains open for production-release readiness. The repository declares AGPL-3.0-only; release packaging must include and verify the complete canonical license text verbatim from an authoritative distribution. An attempted transfer must not be committed unless byte integrity is known.

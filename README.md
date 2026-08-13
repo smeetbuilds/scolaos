@@ -1,8 +1,10 @@
-# ScolaOS
+# ScolaOS — temporary repository codename
 
 **The open-source operating system for schools.**
 
-ScolaOS is an open-source, self-hostable school management platform being built for excellent UX, simple installation, strong performance, and a coherent experience across web, desktop, Android, and iOS.
+> **Naming warning:** a preliminary conflict screen on 13 August 2026 found an unrelated, active school-software product using the exact **ScolaOS** name at `scolaos.com`. The current name is therefore rejected as the final public product brand. The repository slug is retained temporarily to avoid a disruptive engineering rename before a replacement name passes screening. Do not register new domains, publish packages, create app-store assets, or launch public branding under the ScolaOS name.
+
+This repository contains an open-source, self-hostable school management platform being built for excellent UX, simple installation, strong performance, and a coherent experience across web, desktop, Android, and iOS.
 
 > **Project status: pre-alpha / M0 foundation.** There is no production release yet. The repository is being built milestone-by-milestone against the committed PRD and engineering task tracker.
 
@@ -22,15 +24,15 @@ The current architecture baseline is intentionally evidence-driven:
 - React + TypeScript shared client
 - Vite web/PWA client *(provisional until M0 POC gate)*
 - Tauri 2 desktop/mobile shells *(provisional until platform POCs pass)*
-- Fastify + TypeScript API *(provisional until representative API POC passes)*
+- Fastify + TypeScript API *(M0-030 framework POC passed; final architecture lock remains M0-039)*
 - PostgreSQL
-- Drizzle + committed SQL migrations *(provisional until migration POC passes)*
+- Drizzle + committed SQL migrations *(provisional; M0-031 executable PostgreSQL proof is still open)*
 - Local filesystem storage by default, optional S3-compatible adapters
 - PostgreSQL-backed jobs initially
 - REST/OpenAPI boundary
 - Guided web installer at `/start/installation`
 
-Material architecture changes are recorded in [`docs/decision.md`](docs/decision.md).
+Material architecture changes are recorded in [`docs/decision.md`](docs/decision.md). Active decision corrections discovered after the baseline log are recorded in [`docs/decision-amendments.md`](docs/decision-amendments.md) until normalization.
 
 ## Repository layout
 
@@ -56,6 +58,8 @@ Start here:
 - [Master PRD](docs/prd.md)
 - [Architecture / design](docs/design.md)
 - [Architecture decisions](docs/decision.md)
+- [Decision amendments](docs/decision-amendments.md)
+- [Brand/name screening](docs/brand-screening.md)
 - [Threat model](docs/threat-model.md)
 - [Master execution tasklist](docs/tasklist.md)
 - [Live project tracker](docs/project-tracker.md)
@@ -82,7 +86,7 @@ Current contributor baseline:
 ```bash
 git clone https://github.com/smeetbuilds/scolaos.git
 cd scolaos
-pnpm install
+pnpm install --frozen-lockfile
 pnpm check
 ```
 
@@ -97,19 +101,21 @@ pnpm test:e2e
 pnpm build
 ```
 
-The first successful dependency install generates `pnpm-lock.yaml`. Task `M0-021` requires committing that generated lockfile and switching the existing CI/security workflows to frozen installs before architecture POCs proceed.
+The generated `pnpm-lock.yaml` is committed. Dependency manifest changes must regenerate the lockfile normally in a registry-capable environment; do not hand-edit dependency resolution.
 
 ## Repository workflow
 
-During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent commit per implementation batch.
+During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent final commit per implementation batch.
 
 ## Continuous quality
 
-The existing GitHub Actions CI runs formatting, lint, typecheck, unit tests, build, and a Chromium Playwright harness on direct pushes to `main`. The existing security workflow runs dependency auditing on `main` pushes and on its weekly schedule. Dependency upgrades are reviewed manually and committed directly to `main`.
+The existing `CI` and `Security` GitHub Actions workflows are retained as **manual-only** quality recipes because automatic Actions execution is currently paused by owner request. They use `workflow_dispatch`, read-only repository permissions, and frozen dependency installs. Do not restore push, pull-request, schedule, bot-commit, or additional workflow triggers unless the owner explicitly requests it.
+
+When Actions are paused, new executable or database POCs must be validated in another real execution environment before being marked complete. Previous green workflow evidence may only be reused for code that has not changed since that validation.
 
 ## License
 
-ScolaOS is licensed under **GNU AGPL-3.0-only**. See [`LICENSE`](LICENSE).
+The project is declared under **GNU AGPL-3.0-only**. See [`LICENSE`](LICENSE). Production-release packaging still tracks inclusion and verification of the complete canonical license text; do not treat an abbreviated notice as the final release artifact.
 
 ## Contributing & security
 

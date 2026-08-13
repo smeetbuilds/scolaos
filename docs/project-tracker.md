@@ -4,7 +4,7 @@
 **Current milestone:** `M0 — Product & Architecture Foundation`  
 **Last updated:** 13 August 2026
 
-This file is the authoritative compact execution state of ScolaOS. Detailed work definitions remain in `tasklist.md` and `tasklist-amendments.md`. If an older checkbox conflicts with the same task ID here, this tracker wins until backlog normalization.
+This file is the authoritative compact execution state for the project currently stored in the `smeetbuilds/scolaos` repository. Detailed work definitions remain in `tasklist.md` and `tasklist-amendments.md`. Decision corrections discovered after the baseline ADR log are recorded in `decision-amendments.md`.
 
 ---
 
@@ -12,7 +12,7 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 
 | Milestone | State | Completion | Exit gate |
 |---|---|---:|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 34% | Architecture POCs + reproducible quality gates + design foundations |
+| M0 Product & Architecture Foundation | IN PROGRESS | 35% | Architecture POCs + reproducible quality gates + design foundations |
 | M1 Installable Platform Alpha | NOT STARTED | 0% | Web installer + auth + permissions + health |
 | M2 Students & Academic Core | NOT STARTED | 0% | Academic structure + secure student lifecycle |
 | M3 Daily Operations | NOT STARTED | 0% | Timetable + attendance + assignments + announcements |
@@ -27,14 +27,19 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 
 ### IN PROGRESS
 
+- `M0-003` Replacement product-name selection.
+  - Preliminary conflict screening found an unrelated active school-software product already using the exact **ScolaOS** name at `scolaos.com`.
+  - The current name is rejected as the final public product brand and is now only a temporary repository/engineering codename.
+  - Evidence and constraints: `docs/brand-screening.md` and `docs/decision-amendments.md`.
+  - Task remains open until a replacement candidate passes product/domain/repository/package/app-store screening and appropriate trademark clearance.
+
 - `M0-031` Drizzle/PostgreSQL migration POC.
   - Fastify prerequisite and reproducible dependency foundation are complete.
   - Real-PostgreSQL acceptance model is defined in `docs/pocs/drizzle-postgres.md`.
   - Disposable SQL acceptance harness is prepared in `tooling/postgres-poc/`.
-  - Harness proves the target semantics for institution-scoped uniqueness, foreign keys, cross-institution protection, checks, indexes and rollback once executed.
   - Candidate stable stack recorded: Drizzle ORM `0.45.2`, Drizzle Kit `0.31.10`, `pg` `8.22.0`, `@types/pg` `8.20.0`.
-  - No Drizzle packages have been added yet because the current environment cannot reach the package registry and the lockfile must not be hand-edited.
-  - Task remains open until generated Drizzle SQL, migration journal behavior, typed Drizzle queries and the acceptance harness pass against real PostgreSQL.
+  - No Drizzle packages have been added because the current runtime cannot reach the package registry and the lockfile must not be hand-edited.
+  - Task remains open until generated Drizzle SQL, migration journal behavior, typed Drizzle queries, transaction behavior and the acceptance harness pass against real PostgreSQL.
 
 ### NEXT — exact execution order
 
@@ -42,13 +47,13 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 2. `M0-004` Lock supported Node/PostgreSQL environment matrix from Fastify + database POC evidence.
 3. `M0-032..038` Tauri desktop/mobile proof set and architecture decision.
 4. `M0-039` Lock or reject Fastify/Drizzle ADRs based on the combined POC evidence.
-5. `M0-050..061` Design-system foundation.
+5. `M0-050..061` Design-system foundation. Do not invest in permanent wordmark/product-name branding until M0-003 closes.
 6. `M0-070..078` Platform contracts.
 7. `M0-GATE` M0 release-gate review.
 
 ### BLOCKED / EXTERNAL VALIDATION
 
-- `M0-003` Product-name trademark/domain conflict screening remains open. Repository/name availability alone is not legal trademark clearance.
+- `M0-003` cannot complete under the current exact name: the active same-market ScolaOS product makes the existing brand unsuitable. A replacement name must be selected and screened. This is a product-conflict finding, not a legal trademark judgment.
 - `M0-031` executable database proof is blocked in the current runtime because PostgreSQL/`psql`/Docker/Podman are unavailable and package-registry connectivity is unavailable. Static SQL review is not accepted as completion evidence.
 
 ### OPERATIONAL CONSTRAINT
@@ -56,7 +61,7 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 - Automatic GitHub Actions execution is **PAUSED by owner request** because the account Actions quota is constrained.
 - The existing `CI` and `Security` workflow files are retained as manual-only quality recipes using `workflow_dispatch`, read-only repository permissions, and `pnpm install --frozen-lockfile`.
 - Do not restore `push`, `pull_request`, `schedule`, bot commits, or any new GitHub Actions workflow unless the owner explicitly requests it.
-- New implementation work must not claim a fresh CI result while this pause is active; use previous validated evidence where code is unchanged and use another real execution environment when new runtime/database behavior must be proven.
+- New implementation work must not claim a fresh CI result while this pause is active; use previous validated evidence only where code is unchanged and use another real execution environment when new runtime/database behavior must be proven.
 
 ### DONE
 
@@ -79,7 +84,7 @@ Repository/tooling foundation:
 - `M0-018` Dependency-audit/security recipe configured; automatic/scheduled execution is currently paused by owner request.
 - `M0-019` Conventional change/changelog/release process added.
 - `M0-020` CODEOWNERS and maintainer review rules added.
-- `M0-021` CI-generated `pnpm-lock.yaml` committed; frozen-install quality and dependency-audit runs were validated before the Actions pause.
+- `M0-021` Generated `pnpm-lock.yaml` committed; frozen-install quality and dependency-audit runs were validated before the Actions pause.
 
 Architecture POCs:
 
@@ -98,7 +103,7 @@ Repository workflow policy:
 
 ---
 
-## 3. Open architecture decisions
+## 3. Open architecture/product decisions
 
 | ADR | Decision | State |
 |---|---|---|
@@ -110,10 +115,12 @@ Repository workflow policy:
 | ADR-015 | PostgreSQL RLS strategy | OPEN |
 | ADR-020 | OpenAPI; generation proven in M0-030 | PROVISIONAL pending typed-client/platform-contract evidence |
 | ADR-022 | AGPL-3.0-only | ACCEPTED |
-| ADR-023 | ScolaOS working name; formal screening pending | PROVISIONAL |
+| ADR-023 | ScolaOS as final public brand | REJECTED; temporary repo codename only; replacement OPEN |
 | ADR-024 | pnpm workspaces; no Turborepo initially | ACCEPTED |
 | ADR-025 | Auth session/token transport | OPEN |
 | ADR-026 | Full ledger vs fee subsystem for 1.0 | OPEN |
+
+`docs/decision-amendments.md` supersedes the older ADR-023 wording until the main ADR log is normalized.
 
 ---
 
@@ -121,6 +128,7 @@ Repository workflow policy:
 
 | Risk | Severity | Mitigation |
 |---|---|---|
+| Exact-name school-software brand conflict | High | Reject ScolaOS as final brand; select/screen replacement before public branding |
 | Tauri mobile limitations harm native UX | High | Platform POCs before architecture lock |
 | Installer stays privileged after setup | Critical | Explicit install state/lock + security integration tests |
 | Permission model becomes unmaintainable | Critical | Permission catalog + scoped authorization service/tests |
@@ -151,6 +159,7 @@ Repository workflow policy:
 | Playwright harness | ✅ Fastify POC revision validated before Actions pause |
 | M0-030 Fastify POC | ✅ PASSED |
 | M0-031 PostgreSQL acceptance contract/harness | ⚠️ prepared; real execution pending |
+| Product-name conflict screen | ⚠️ exact-name conflict confirmed; replacement pending |
 | Initial threat model | ✅ |
 | Documentation | ✅ |
 | Automatic GitHub Actions | ⏸️ PAUSED by owner request |
@@ -177,4 +186,4 @@ While automatic GitHub Actions are paused, do not mark new executable/database P
 
 If work stops and the user says **continue**, resume at:
 
-> `M0-031 — execute the prepared Drizzle/PostgreSQL POC in a real PostgreSQL + package-registry-capable environment. Add reviewed dependencies without hand-editing pnpm-lock.yaml, generate and apply committed Drizzle SQL, verify drizzle.__drizzle_migrations, typed queries, constraints/indexes and transaction behavior, then run tooling/postgres-poc against PostgreSQL 16.14 and 18.4. Do not use GitHub Actions while the owner quota constraint is active.`
+> `M0-031 — execute the prepared Drizzle/PostgreSQL POC in a real PostgreSQL + package-registry-capable environment. Add reviewed dependencies without hand-editing pnpm-lock.yaml, generate and apply committed Drizzle SQL, verify drizzle.__drizzle_migrations, typed queries, constraints/indexes and transaction behavior, then run tooling/postgres-poc against PostgreSQL 16.14 and 18.4. Do not use GitHub Actions while the owner quota constraint is active. In parallel, do not create new permanent public branding under the ScolaOS name; M0-003 requires a replacement.`
