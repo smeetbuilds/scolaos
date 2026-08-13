@@ -12,7 +12,7 @@ This file is the authoritative compact execution state for the project currently
 
 | Milestone | State | Completion | Exit gate |
 |---|---|---:|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 35% | Architecture POCs + reproducible quality gates + design foundations |
+| M0 Product & Architecture Foundation | IN PROGRESS | 37% | Architecture POCs + reproducible quality gates + design foundations |
 | M1 Installable Platform Alpha | NOT STARTED | 0% | Web installer + auth + permissions + health |
 | M2 Students & Academic Core | NOT STARTED | 0% | Academic structure + secure student lifecycle |
 | M3 Daily Operations | NOT STARTED | 0% | Timetable + attendance + assignments + announcements |
@@ -48,7 +48,7 @@ This file is the authoritative compact execution state for the project currently
 3. `M0-032..038` Tauri desktop/mobile proof set and architecture decision.
 4. `M0-039` Lock or reject Fastify/Drizzle ADRs based on the combined POC evidence.
 5. `M0-050..061` Design-system foundation. Do not invest in permanent wordmark/product-name branding until M0-003 closes.
-6. `M0-070..078` Platform contracts.
+6. Remaining platform contracts: `M0-071..076` and `M0-078`. `M0-070` and `M0-077` are complete.
 7. `M0-GATE` M0 release-gate review.
 
 ### BLOCKED / EXTERNAL VALIDATION
@@ -89,6 +89,11 @@ Repository/tooling foundation:
 Architecture POCs:
 
 - `M0-030` Fastify API POC **PASSED**. Evidence: `apps/server`, `docs/pocs/fastify-api.md`. Proven on Fastify `5.10.0` + `@fastify/swagger` `9.8.1`: JSON Schema validation/serialization, request IDs, standardized error envelopes, typed authorization-hook seam, OpenAPI 3.0.3 generation, safe host/port parsing, graceful shutdown, HTTP injection tests and build/type/lint/format validation. The last code revision passed the repository quality workflow before automatic Actions were paused.
+
+Platform contracts:
+
+- `M0-070` API error contract **DONE**. Evidence: `docs/contracts/api-errors.md` plus the already-validated Fastify error/request-correlation implementation. Locked: standard envelope, stable codes, HTTP mapping, validation details, request-ID correlation and safe disclosure rules.
+- `M0-077` Module-boundary conventions **DONE**. Evidence: `docs/contracts/module-boundaries.md`, ADR-019 and existing default-deny `eslint-plugin-boundaries` enforcement. Locked: app/package dependency direction, modular-monolith ownership and boundary exception discipline.
 
 Repository workflow policy:
 
@@ -141,6 +146,8 @@ Repository workflow policy:
 | Toolchain drift breaks reproducibility | High | Exact pins + committed generated lockfile + frozen installs |
 | Actions quota hides regressions if treated as green CI | High | Auto Actions paused explicitly; never claim new CI evidence without execution |
 | Database POC is falsely accepted from static SQL | Critical | M0-031 cannot pass without generated Drizzle migrations + real PostgreSQL execution |
+| API clients couple to message strings/framework errors | High | M0-070 stable machine codes + shared error envelope |
+| Module graph becomes cyclic as domains grow | High | M0-077 default-deny boundaries + explicit ownership/exception process |
 
 ---
 
@@ -159,6 +166,8 @@ Repository workflow policy:
 | Playwright harness | ✅ Fastify POC revision validated before Actions pause |
 | M0-030 Fastify POC | ✅ PASSED |
 | M0-031 PostgreSQL acceptance contract/harness | ⚠️ prepared; real execution pending |
+| M0-070 API error contract | ✅ documented + implementation previously validated |
+| M0-077 module-boundary contract | ✅ documented + top-level enforcement previously validated |
 | Product-name conflict screen | ⚠️ exact-name conflict confirmed; replacement pending |
 | Initial threat model | ✅ |
 | Documentation | ✅ |
@@ -178,7 +187,7 @@ Legend: `⬜` pending, `✅` passed, `⚠️` active issue, `❌` failed, `⏸�
 
 `Any → BLOCKED` must record the blocker, dependency/decision, and exact next action.
 
-While automatic GitHub Actions are paused, do not mark new executable/database POCs DONE solely from static code review.
+While automatic GitHub Actions are paused, do not mark new executable/database POCs DONE solely from static code review. Documentation contracts may close when they formalize behavior/enforcement that was already executable and validated before the pause, provided no underlying runtime code changes.
 
 ---
 
@@ -186,4 +195,4 @@ While automatic GitHub Actions are paused, do not mark new executable/database P
 
 If work stops and the user says **continue**, resume at:
 
-> `M0-031 — execute the prepared Drizzle/PostgreSQL POC in a real PostgreSQL + package-registry-capable environment. Add reviewed dependencies without hand-editing pnpm-lock.yaml, generate and apply committed Drizzle SQL, verify drizzle.__drizzle_migrations, typed queries, constraints/indexes and transaction behavior, then run tooling/postgres-poc against PostgreSQL 16.14 and 18.4. Do not use GitHub Actions while the owner quota constraint is active. In parallel, do not create new permanent public branding under the ScolaOS name; M0-003 requires a replacement.`
+> `M0-031 remains the primary architecture blocker: execute the prepared Drizzle/PostgreSQL POC in a real PostgreSQL + package-registry-capable environment without GitHub Actions. If that environment is still unavailable, continue independent M0 work that does not require unvalidated runtime changes; remaining platform-contract tasks are M0-071..076 and M0-078. Do not create permanent public branding under the ScolaOS name while M0-003 remains open.`

@@ -34,6 +34,18 @@ This file records task-state changes and new stable IDs discovered after the ori
   **Proven:** JSON Schema validation/serialization, request IDs, standardized error envelopes, typed authorization-hook context, OpenAPI generation, safe config parsing, graceful shutdown.  
   **Decision effect:** ADR-008 and ADR-020 remain provisional until the later architecture lock; M0-030 removes the framework-level proof blocker.
 
+## Completed platform contracts
+
+- [x] **M0-070 [P0]** Define API error contract.  
+  **Evidence:** `docs/contracts/api-errors.md`, `apps/server/src/errors.ts`, `apps/server/src/app.ts`, `apps/server/src/app.test.ts`.  
+  **Locked semantics:** top-level `error` envelope; stable machine code; safe message; request correlation ID; optional structured validation details; `x-request-id` parity; no raw framework/database/stack leakage; compatibility discipline for published codes/fields.  
+  **Validation basis:** the implementing Fastify error path and request-correlation behavior were already exercised by the validated M0-030 injection tests before Actions were paused. No runtime code changed to close this documentation task.
+
+- [x] **M0-077 [P0]** Define module-boundary conventions.  
+  **Evidence:** `docs/contracts/module-boundaries.md`, `eslint.config.mjs`, ADR-019.  
+  **Locked semantics:** default-deny top-level dependency direction; server/client/shared-package separation; domain/config foundation rules; production cannot import tests; modular-monolith feature ownership; reviewed exception process.  
+  **Validation basis:** the top-level dependency graph is already enforced with `eslint-plugin-boundaries`; the lint configuration was validated before Actions were paused. The new document formalizes the existing enforced architecture and finer-grained module convention.
+
 ## Active architecture POC
 
 - [ ] **M0-031 [P0]** Drizzle/PostgreSQL migration POC + integration tests — **IN PROGRESS**.  
@@ -43,6 +55,16 @@ This file records task-state changes and new stable IDs discovered after the ori
   **Prepared semantics:** UUID keys, institution-scoped uniqueness, FK enforcement, compound institution/student FK, checks, indexes, explicit rollback proof and disposable-database safety guard.  
   **Still required:** add reviewed dependencies with a normally regenerated lockfile; implement typed Drizzle schema/config; generate and commit Drizzle SQL/metadata; apply to real PostgreSQL; verify `drizzle.__drizzle_migrations`; repeat migration application; run typed query/transaction integration tests; run the prepared acceptance harness on PostgreSQL 16.14 and 18.4.  
   **Execution constraint:** current runtime has no PostgreSQL/psql/Docker/Podman and no package-registry connectivity. Do not hand-edit the lockfile or mark this POC DONE from static SQL. Do not use GitHub Actions while the owner quota constraint is active.
+
+## Remaining platform contracts
+
+- [ ] **M0-071 [P0]** Pagination/filter/sort contract.
+- [ ] **M0-072 [P0]** API compatibility/version metadata.
+- [ ] **M0-073 [P0]** Platform-bridge interfaces.
+- [ ] **M0-074 [P0]** Storage-provider interface.
+- [ ] **M0-075 [P0]** Notification event/channel interfaces.
+- [ ] **M0-076 [P0]** Background-job contract.
+- [ ] **M0-078 [P0]** Audit-event contract.
 
 ## Main-only workflow policy
 

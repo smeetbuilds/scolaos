@@ -14,6 +14,9 @@ The project is currently pre-alpha and follows milestone-driven development.
 - Prepared the M0-031 Drizzle/PostgreSQL execution contract with candidate stable package versions, a PostgreSQL 16/18 validation matrix, migration acceptance criteria and explicit non-pass conditions.
 - Added `tooling/postgres-poc/` with a guarded disposable-database reference schema and verification harness for institution-scoped constraints, indexes and transaction rollback.
 - Added preliminary product-name conflict screening and an ADR-023 amendment after identifying an active same-market school-software product using the exact ScolaOS name.
+- Added the M0-070 API error contract covering the stable envelope, request correlation, machine codes, HTTP mapping, validation details and safe disclosure rules.
+- Added the M0-077 module-boundary contract documenting the default-deny dependency graph, modular-monolith ownership conventions and exception process.
+- Added `docs/contracts/README.md` as the index for completed and remaining M0 platform contracts.
 
 ### Changed
 
@@ -23,6 +26,8 @@ The project is currently pre-alpha and follows milestone-driven development.
 - Synchronized the live project tracker with the M0-031 preparation state without falsely marking the database POC complete.
 - Reclassified ScolaOS as a temporary repository/engineering codename rather than the final public product brand; M0-003 now requires selection and screening of a replacement name.
 - Corrected the README to reflect the committed frozen lockfile, manual-only GitHub Actions state, completed Fastify POC, active PostgreSQL POC, and current naming risk.
+- Closed M0-070 and M0-077 using previously validated Fastify/ESLint behavior without changing application runtime code while GitHub Actions are paused.
+- Advanced the M0 execution board to approximately 37% while leaving PostgreSQL and naming gates explicitly open.
 
 ### Repository
 
