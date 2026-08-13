@@ -20,23 +20,29 @@ This file records task-state changes and new stable IDs discovered after the ori
   **Evidence:** `.github/workflows/ci.yml`. CI evidence is still required for the M0 quality gate.
 
 - [x] **M0-017 [P1]** Configure dependency update policy.  
-  **Evidence:** `.github/dependabot.yml`, `docs/dependency-policy.md`.
+  **Evidence:** `docs/dependency-policy.md`; dependency discovery/review is manual and direct-to-`main`, with automated PR creation disabled.
 
 - [x] **M0-018 [P0]** Configure secret/dependency security controls.  
   **Evidence:** `.github/workflows/security.yml`, `SECURITY.md`, `docs/dependency-policy.md`. Repository-level GitHub secret-scanning settings remain an external platform control.
 
 - [x] **M0-019 [P1]** Add conventional change/release/changelog process.  
-  **Evidence:** `CHANGELOG.md`, `docs/releasing.md`, PR template.
+  **Evidence:** `CHANGELOG.md`, `docs/releasing.md`.
 
 - [x] **M0-020 [P1]** Add CODEOWNERS/review rules for current maintainer.  
-  **Evidence:** `.github/CODEOWNERS`, PR review checklist. Enforced branch-protection policy is intentionally deferred while direct-to-main bootstrap work is active.
+  **Evidence:** `.github/CODEOWNERS`, `CONTRIBUTING.md`. Enforced branch-protection policy is intentionally deferred while direct-to-main bootstrap work is active.
 
 ## New task discovered during implementation
 
 - [ ] **M0-021 [P0]** Commit generated pnpm lockfile and freeze CI installs.  
   **Depends:** M0-016  
-  **Why added:** the execution container cannot access npm, so it cannot safely generate a real dependency-resolution lockfile. CI is configured to generate `pnpm-lock.yaml` using the approved Node/pnpm versions and upload it as an artifact.  
-  **Done when:** generated lockfile is reviewed and committed; CI/security workflows use `pnpm install --frozen-lockfile`; lockfile generation is reproducible.
+  **Why added:** the execution container cannot access npm, so it cannot safely generate a real dependency-resolution lockfile. The existing CI is temporarily configured to generate `pnpm-lock.yaml` using the approved Node/pnpm versions and upload it as an artifact.  
+  **Done when:** generated lockfile is reviewed and committed; existing CI/security workflows use `pnpm install --frozen-lockfile`; lockfile generation is reproducible.
+
+## Main-only workflow correction
+
+- Automated Dependabot branch/PR creation is disabled because the active repository policy is direct-to-`main` only.
+- Existing CI/security workflows trigger on `main` pushes (security also retains its scheduled audit); no PR trigger is required during bootstrap.
+- Dependency upgrades are reviewed manually and committed as normal main-branch maintenance batches.
 
 ## Half-done/open-source packaging note
 

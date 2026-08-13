@@ -1,5 +1,11 @@
 # Release and Change Process
 
+## Repository flow
+
+During the bootstrap phase, changes are committed directly to `main`. Feature branches, pull requests, and automated dependency-update PRs are not part of the active workflow. Each implementation batch should produce one coherent commit after its applicable checks are reviewed.
+
+This policy can change only through an explicit project decision; tooling must not silently introduce branch/PR-based delivery.
+
 ## Commit convention
 
 Use Conventional Commit-style subjects:

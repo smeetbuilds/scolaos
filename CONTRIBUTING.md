@@ -9,9 +9,13 @@ ScolaOS is early-stage. Contributions are welcome, but the architecture and exec
 3. Find the relevant stable task ID in `docs/tasklist.md`.
 4. If your change contradicts an accepted ADR, update the ADR explicitly in the same change rather than silently diverging.
 
+## Current repository workflow
+
+During bootstrap, maintainers commit directly to `main`. Do not create feature branches, pull requests, or bot-generated dependency-update PRs. Each work batch should result in one coherent commit after the relevant checks/evidence are reviewed.
+
 ## Local quality gates
 
-Run the relevant commands before review:
+Run the relevant commands before a change is considered complete:
 
 ```bash
 pnpm format:check
@@ -36,7 +40,7 @@ A feature is not done because its happy path renders. Apply the relevant gates f
 - Do not introduce a mandatory hosted/proprietary service without an ADR.
 - New dependencies require the review in `docs/dependency-policy.md`.
 - Avoid country-specific assumptions in core academic/domain models unless implemented as configuration or an adapter.
-- Architecture, security, CI, server, and documentation changes require the CODEOWNER while the project has a single maintainer.
+- Architecture, security, CI, server, and documentation changes require explicit maintainer review before the direct-to-main commit is finalized.
 
 ## License of contributions
 

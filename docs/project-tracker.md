@@ -27,11 +27,11 @@ This file is the authoritative compact execution state of the project. Detailed 
 
 ### IN PROGRESS
 
-None at commit boundary.
+- `M0-021` Lockfile/frozen-install task: invalid `@eslint/js` pin corrected; waiting for the existing main-branch CI run to generate the real `pnpm-lock.yaml` artifact and expose any next quality-gate issue.
 
 ### NEXT — exact execution order
 
-1. `M0-021` Generate/commit `pnpm-lock.yaml` from the approved CI toolchain and switch CI/security installs to `--frozen-lockfile`.
+1. Finish `M0-021`: review/commit CI-generated `pnpm-lock.yaml`, switch existing CI/security installs to `--frozen-lockfile`, then verify green gates.
 2. `M0-030` Fastify API POC with validation, error envelope, request IDs, auth hook stub, and OpenAPI generation.
 3. `M0-031` Drizzle/PostgreSQL migration POC + integration tests; use evidence to lock supported PostgreSQL matrix.
 4. `M0-004` Confirm supported server environment after API/database POCs.
@@ -44,7 +44,7 @@ None at commit boundary.
 ### BLOCKED / EXTERNAL VALIDATION
 
 - `M0-003` Product-name trademark/domain conflict screening remains intentionally open. Repository/name availability alone is not a legal trademark clearance.
-- `M0-021` Lockfile cannot be generated in the current execution container because outbound npm access is unavailable; CI is configured to generate and upload it as a short-lived artifact.
+- `M0-021` Final lockfile commit is waiting on a successful existing CI dependency-resolution run; this execution container does not have outbound npm access.
 
 ### DONE
 
@@ -62,11 +62,19 @@ Repository/tooling foundation:
 - `M0-013` ESLint flat config, Prettier, and monorepo import-boundary policy configured.
 - `M0-014` Vitest unit-test harness and V8 coverage configuration added.
 - `M0-015` Playwright Chromium E2E harness added.
-- `M0-016` CI workflow configured for formatting, lint, typecheck, unit tests, build, and E2E harness.
-- `M0-017` Weekly Dependabot policy configured for npm and GitHub Actions.
-- `M0-018` Dependency-audit workflow configured; public-repository GitHub secret scanning documented as baseline.
-- `M0-019` Conventional change/changelog/release process added.
-- `M0-020` CODEOWNERS and review checklist added for the current maintainer.
+- `M0-016` Existing CI workflow configured for formatting, lint, typecheck, unit tests, build, and E2E harness on direct `main` pushes.
+- `M0-017` Dependency update policy configured for manual review/direct-to-`main`; automated dependency branch/PR creation disabled.
+- `M0-018` Existing dependency-audit workflow configured; public-repository GitHub secret scanning documented as baseline.
+- `M0-019` Conventional change/changelog/release process added and aligned to direct-to-`main` workflow.
+- `M0-020` CODEOWNERS and maintainer review rules added.
+
+Repository workflow policy:
+
+- Direct-to-`main` only during bootstrap.
+- No feature branches.
+- No pull requests.
+- No automated dependency PRs/branches.
+- One coherent commit per implementation batch.
 
 Planning pack committed:
 
@@ -118,7 +126,7 @@ Planning pack committed:
 | Local private uploads become publicly exposed | Critical | Medium | authorized file serving + path hardening + security tests | M6 |
 | Feature breadth destroys UX quality | High | High | milestone gating; role-specific IA; each module requires responsive UX acceptance | Always |
 | Open-source contributions erode architecture | Medium | Medium | module boundaries, ADRs, contribution docs, CI checks | M6+ |
-| Dependency/toolchain drift breaks reproducibility | High | Medium | exact pins, lockfile task, frozen CI after artifact commit, Dependabot | M0 |
+| Dependency/toolchain drift breaks reproducibility | High | Medium | exact pins, reviewed lockfile, frozen CI after M0-021, manual upgrade batches | M0 |
 
 ---
 
@@ -126,10 +134,10 @@ Planning pack committed:
 
 | Gate | M0 | M1 | M2 | M3 | M4 | M5 | M6 |
 |---|---|---|---|---|---|---|---|
-| Typecheck/lint | ⬜ CI run pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Unit tests | ⬜ CI run pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Typecheck/lint | ⬜ rerun after dependency fix | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Unit tests | ⬜ rerun after dependency fix | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Integration tests | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| E2E critical paths | ⬜ CI harness pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| E2E critical paths | ⬜ rerun after dependency fix | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Authorization tests | N/A | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Responsive review | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Accessibility review | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
@@ -175,4 +183,4 @@ Record:
 
 If work stops and the user says **continue**, resume at:
 
-> `M0-021 — commit the CI-generated pnpm-lock.yaml and freeze installs`. If the CI artifact is unavailable or the workflow failed before generating it, diagnose/fix that workflow first in the same milestone, then continue to `M0-030`.
+> `M0-021 — inspect the current main-branch CI run, retrieve the generated pnpm-lock.yaml artifact if successful, commit it, freeze existing CI/security installs, and verify the quality gates`. Then continue to `M0-030`.

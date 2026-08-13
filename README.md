@@ -97,11 +97,15 @@ pnpm test:e2e
 pnpm build
 ```
 
-The first dependency install currently generates `pnpm-lock.yaml`. Task `M0-021` requires committing the generated lockfile and switching CI to frozen installs before architecture POCs proceed.
+The first successful dependency install generates `pnpm-lock.yaml`. Task `M0-021` requires committing that generated lockfile and switching the existing CI/security workflows to frozen installs before architecture POCs proceed.
+
+## Repository workflow
+
+During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent commit per implementation batch.
 
 ## Continuous quality
 
-GitHub Actions runs formatting, lint, typecheck, unit tests, build, and a Chromium Playwright harness. A separate security workflow runs dependency auditing. Dependabot is configured for npm and GitHub Actions updates.
+The existing GitHub Actions CI runs formatting, lint, typecheck, unit tests, build, and a Chromium Playwright harness on direct pushes to `main`. The existing security workflow runs dependency auditing on `main` pushes and on its weekly schedule. Dependency upgrades are reviewed manually and committed directly to `main`.
 
 ## License
 
