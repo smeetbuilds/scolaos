@@ -1,49 +1,36 @@
 # Tasklist Amendments — M0
 
-This file records task-state changes and new stable IDs discovered after the original master backlog was committed. `docs/project-tracker.md` is authoritative for current status. These amendments must be folded into `docs/tasklist.md` during the next backlog normalization without renumbering any existing ID.
+This file records task-state changes and new stable IDs discovered after the original master backlog was committed. `docs/project-tracker.md` is authoritative for current status. These amendments must be folded into `docs/tasklist.md` during backlog normalization without renumbering existing IDs.
 
-## Completed in repository-tooling batch
+## Completed repository/tooling tasks
 
-- [x] **M0-005 [P0]** Create initial threat model.  
-  **Evidence:** `docs/threat-model.md`.
+- [x] **M0-005 [P0]** Initial threat model. Evidence: `docs/threat-model.md`.
+- [x] **M0-013 [P0]** Linting/formatting/import-boundary rules. Evidence: `eslint.config.mjs`, `prettier.config.mjs`, `.prettierignore`.
+- [x] **M0-014 [P0]** Unit-test framework. Evidence: `vitest.config.ts`, `tooling/tests/harness.test.ts`.
+- [x] **M0-015 [P0]** Playwright E2E harness. Evidence: `playwright.config.ts`, `tests/e2e/harness.spec.ts`.
+- [x] **M0-016 [P0]** Existing CI configured for install/format/lint/typecheck/test/build/E2E on direct `main` pushes.
+- [x] **M0-017 [P1]** Dependency update policy: manual review/direct-to-`main`; automated dependency PR creation disabled.
+- [x] **M0-018 [P0]** Existing dependency-audit workflow and secret-scanning baseline.
+- [x] **M0-019 [P1]** Conventional change/release/changelog process.
+- [x] **M0-020 [P1]** CODEOWNERS and maintainer review rules.
 
-- [x] **M0-013 [P0]** Configure linting/formatting/import-boundary rules.  
-  **Evidence:** `eslint.config.mjs`, `prettier.config.mjs`, `.prettierignore`.
+## Active reproducibility task
 
-- [x] **M0-014 [P0]** Configure unit-test framework.  
-  **Evidence:** `vitest.config.ts`, `tooling/tests/harness.test.ts`.
-
-- [x] **M0-015 [P0]** Configure Playwright E2E harness.  
-  **Evidence:** `playwright.config.ts`, `tests/e2e/harness.spec.ts`.
-
-- [x] **M0-016 [P0]** Configure CI for install/typecheck/lint/test/build.  
-  **Evidence:** `.github/workflows/ci.yml`. CI evidence is still required for the M0 quality gate.
-
-- [x] **M0-017 [P1]** Configure dependency update policy.  
-  **Evidence:** `docs/dependency-policy.md`; dependency discovery/review is manual and direct-to-`main`, with automated PR creation disabled.
-
-- [x] **M0-018 [P0]** Configure secret/dependency security controls.  
-  **Evidence:** `.github/workflows/security.yml`, `SECURITY.md`, `docs/dependency-policy.md`. Repository-level GitHub secret-scanning settings remain an external platform control.
-
-- [x] **M0-019 [P1]** Add conventional change/release/changelog process.  
-  **Evidence:** `CHANGELOG.md`, `docs/releasing.md`.
-
-- [x] **M0-020 [P1]** Add CODEOWNERS/review rules for current maintainer.  
-  **Evidence:** `.github/CODEOWNERS`, `CONTRIBUTING.md`. Enforced branch-protection policy is intentionally deferred while direct-to-main bootstrap work is active.
-
-## New task discovered during implementation
-
-- [ ] **M0-021 [P0]** Commit generated pnpm lockfile and freeze CI installs.  
+- [ ] **M0-021 [P0]** Commit generated pnpm lockfile and freeze existing CI installs.  
   **Depends:** M0-016  
-  **Why added:** the execution container cannot access npm, so it cannot safely generate a real dependency-resolution lockfile. The existing CI is temporarily configured to generate `pnpm-lock.yaml` using the approved Node/pnpm versions and upload it as an artifact.  
-  **Done when:** generated lockfile is reviewed and committed; existing CI/security workflows use `pnpm install --frozen-lockfile`; lockfile generation is reproducible.
+  **Evidence so far:** the existing main-branch CI successfully generated a real `pnpm-lock.yaml` with Node 24 and pnpm 11.18.0 after the invalid `@eslint/js` pin was corrected; dependency installation succeeds; the Security workflow dependency audit succeeds.  
+  **Current subtask:** correct the formatting gate so it checks executable source/tests/package manifests rather than long-form planning Markdown, then expose the next real CI gate.  
+  **Done when:** the generated lockfile is committed verbatim; existing CI/security use `pnpm install --frozen-lockfile`; formatting, lint, typecheck, unit, build, and E2E harness complete successfully.  
+  **Integrity rule:** do not hand-reconstruct or manually simplify the generated lockfile to close this task.
 
-## Main-only workflow correction
+## Main-only workflow policy
 
-- Automated Dependabot branch/PR creation is disabled because the active repository policy is direct-to-`main` only.
-- Existing CI/security workflows trigger on `main` pushes (security also retains its scheduled audit); no PR trigger is required during bootstrap.
-- Dependency upgrades are reviewed manually and committed as normal main-branch maintenance batches.
+- Direct-to-`main` only during bootstrap.
+- No feature branches or pull requests.
+- No automated dependency branches/PRs.
+- Existing CI/security workflows remain the only active quality workflows unless an explicit project decision changes that.
+- One coherent commit per implementation batch.
 
-## Half-done/open-source packaging note
+## Open-source packaging note
 
-`M6-091 LICENSE` remains open for production-release readiness. The repository already declares AGPL-3.0-only, but the canonical license text must be copied verbatim from the authoritative license distribution before release. Do not hand-reconstruct or paraphrase license terms.
+`M6-091 LICENSE` remains open for production-release readiness. The repository declares AGPL-3.0-only, but release packaging must include the canonical license text verbatim from an authoritative distribution.
