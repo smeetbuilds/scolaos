@@ -12,7 +12,7 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 
 | Milestone | State | Completion | Exit gate |
 |---|---|---:|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 33% | Architecture POCs + reproducible quality gates + design foundations |
+| M0 Product & Architecture Foundation | IN PROGRESS | 34% | Architecture POCs + reproducible quality gates + design foundations |
 | M1 Installable Platform Alpha | NOT STARTED | 0% | Web installer + auth + permissions + health |
 | M2 Students & Academic Core | NOT STARTED | 0% | Academic structure + secure student lifecycle |
 | M3 Daily Operations | NOT STARTED | 0% | Timetable + attendance + assignments + announcements |
@@ -27,11 +27,18 @@ This file is the authoritative compact execution state of ScolaOS. Detailed work
 
 ### IN PROGRESS
 
-None at commit boundary.
+- `M0-031` Drizzle/PostgreSQL migration POC.
+  - Fastify prerequisite and reproducible dependency foundation are complete.
+  - Real-PostgreSQL acceptance model is defined in `docs/pocs/drizzle-postgres.md`.
+  - Disposable SQL acceptance harness is prepared in `tooling/postgres-poc/`.
+  - Harness proves the target semantics for institution-scoped uniqueness, foreign keys, cross-institution protection, checks, indexes and rollback once executed.
+  - Candidate stable stack recorded: Drizzle ORM `0.45.2`, Drizzle Kit `0.31.10`, `pg` `8.22.0`, `@types/pg` `8.20.0`.
+  - No Drizzle packages have been added yet because the current environment cannot reach the package registry and the lockfile must not be hand-edited.
+  - Task remains open until generated Drizzle SQL, migration journal behavior, typed Drizzle queries and the acceptance harness pass against real PostgreSQL.
 
 ### NEXT — exact execution order
 
-1. `M0-031` Drizzle/PostgreSQL POC with generated/committed SQL migrations, migration application/versioning, constraints/indexes, transaction behavior, and integration tests against real PostgreSQL.
+1. Finish `M0-031` in a PostgreSQL/package-registry-capable environment: add reviewed dependencies, regenerate the lockfile normally, generate/apply Drizzle migrations, run typed integration tests and execute the prepared acceptance harness on PostgreSQL 16.14 and 18.4.
 2. `M0-004` Lock supported Node/PostgreSQL environment matrix from Fastify + database POC evidence.
 3. `M0-032..038` Tauri desktop/mobile proof set and architecture decision.
 4. `M0-039` Lock or reject Fastify/Drizzle ADRs based on the combined POC evidence.
@@ -42,6 +49,7 @@ None at commit boundary.
 ### BLOCKED / EXTERNAL VALIDATION
 
 - `M0-003` Product-name trademark/domain conflict screening remains open. Repository/name availability alone is not legal trademark clearance.
+- `M0-031` executable database proof is blocked in the current runtime because PostgreSQL/`psql`/Docker/Podman are unavailable and package-registry connectivity is unavailable. Static SQL review is not accepted as completion evidence.
 
 ### OPERATIONAL CONSTRAINT
 
@@ -97,7 +105,7 @@ Repository workflow policy:
 | ADR-006 | Vite final confirmation | PROVISIONAL |
 | ADR-007 | Tauri 2 final confirmation | PROVISIONAL |
 | ADR-008 | Fastify; M0-030 framework POC passed | PROVISIONAL pending M0-039 |
-| ADR-009 | Drizzle | PROVISIONAL; M0-031 pending |
+| ADR-009 | Drizzle; M0-031 acceptance contract prepared | PROVISIONAL; executable DB proof pending |
 | ADR-012 | PostgreSQL job queue implementation | PROVISIONAL |
 | ADR-015 | PostgreSQL RLS strategy | OPEN |
 | ADR-020 | OpenAPI; generation proven in M0-030 | PROVISIONAL pending typed-client/platform-contract evidence |
@@ -124,6 +132,7 @@ Repository workflow policy:
 | Feature breadth destroys UX quality | High | Milestone gates + role-specific information architecture |
 | Toolchain drift breaks reproducibility | High | Exact pins + committed generated lockfile + frozen installs |
 | Actions quota hides regressions if treated as green CI | High | Auto Actions paused explicitly; never claim new CI evidence without execution |
+| Database POC is falsely accepted from static SQL | Critical | M0-031 cannot pass without generated Drizzle migrations + real PostgreSQL execution |
 
 ---
 
@@ -141,6 +150,7 @@ Repository workflow policy:
 | Build | ✅ Fastify POC revision validated before Actions pause |
 | Playwright harness | ✅ Fastify POC revision validated before Actions pause |
 | M0-030 Fastify POC | ✅ PASSED |
+| M0-031 PostgreSQL acceptance contract/harness | ⚠️ prepared; real execution pending |
 | Initial threat model | ✅ |
 | Documentation | ✅ |
 | Automatic GitHub Actions | ⏸️ PAUSED by owner request |
@@ -167,4 +177,4 @@ While automatic GitHub Actions are paused, do not mark new executable/database P
 
 If work stops and the user says **continue**, resume at:
 
-> `M0-031 — build and validate the Drizzle/PostgreSQL migration POC. Do not use or create GitHub Actions while the owner quota constraint is active. The task is DONE only after real PostgreSQL migration/integration evidence exists; then proceed to M0-004 and M0-039.`
+> `M0-031 — execute the prepared Drizzle/PostgreSQL POC in a real PostgreSQL + package-registry-capable environment. Add reviewed dependencies without hand-editing pnpm-lock.yaml, generate and apply committed Drizzle SQL, verify drizzle.__drizzle_migrations, typed queries, constraints/indexes and transaction behavior, then run tooling/postgres-poc against PostgreSQL 16.14 and 18.4. Do not use GitHub Actions while the owner quota constraint is active.`

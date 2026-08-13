@@ -25,12 +25,15 @@ This file records task-state changes and new stable IDs discovered after the ori
   **Proven:** JSON Schema validation/serialization, request IDs, standardized error envelopes, typed authorization-hook context, OpenAPI generation, safe config parsing, graceful shutdown.  
   **Decision effect:** ADR-008 and ADR-020 remain provisional until the later architecture lock; M0-030 removes the framework-level proof blocker.
 
-## Next architecture POC
+## Active architecture POC
 
-- [ ] **M0-031 [P0]** Drizzle/PostgreSQL migration POC + integration tests.  
+- [ ] **M0-031 [P0]** Drizzle/PostgreSQL migration POC + integration tests — **IN PROGRESS**.  
   **Depends:** M0-021, M0-030  
-  **Must prove:** committed SQL migrations, deterministic apply order/version tracking, relational constraints/indexes, transaction semantics, repeatable integration tests against real PostgreSQL, safe failure behavior and evidence for ADR-009/environment support.  
-  **Execution constraint:** do not create, re-enable, or trigger GitHub Actions while the owner quota constraint is active. Static code alone is not sufficient to mark this POC DONE.
+  **Prepared evidence:** `docs/pocs/drizzle-postgres.md`, `tooling/postgres-poc/reference-schema.sql`, `tooling/postgres-poc/verify.sql`, `tooling/postgres-poc/run.sh`.  
+  **Candidate stable stack:** Drizzle ORM `0.45.2`, Drizzle Kit `0.31.10`, `pg` `8.22.0`, `@types/pg` `8.20.0`; node-postgres is the candidate driver.  
+  **Prepared semantics:** UUID keys, institution-scoped uniqueness, FK enforcement, compound institution/student FK, checks, indexes, explicit rollback proof and disposable-database safety guard.  
+  **Still required:** add reviewed dependencies with a normally regenerated lockfile; implement typed Drizzle schema/config; generate and commit Drizzle SQL/metadata; apply to real PostgreSQL; verify `drizzle.__drizzle_migrations`; repeat migration application; run typed query/transaction integration tests; run the prepared acceptance harness on PostgreSQL 16.14 and 18.4.  
+  **Execution constraint:** current runtime has no PostgreSQL/psql/Docker/Podman and no package-registry connectivity. Do not hand-edit the lockfile or mark this POC DONE from static SQL. Do not use GitHub Actions while the owner quota constraint is active.
 
 ## Main-only workflow policy
 
