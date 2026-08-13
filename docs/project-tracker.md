@@ -2,87 +2,104 @@
 
 **Project status:** `IN PROGRESS`  
 **Primary milestone:** `M0 — Product & Architecture Foundation`  
-**Parallel foundation:** `M1 — dependency-independent installer + authorization foundations`  
+**Parallel foundation:** `M1 — installer, authorization and identity foundations`  
 **Last updated:** 13 August 2026
 
-## 1. Milestone status
+## Milestone status
 
-| Milestone | State | Completion | Exit gate |
-|---|---|---:|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 57% | Architecture POCs + reproducible quality gates + usable design foundations |
-| M1 Installable Platform Alpha | IN PROGRESS (parallel foundation) | 21% | Installer + auth + permissions + health |
-| M2 Students & Academic Core | NOT STARTED | 0% | Academic structure + secure student lifecycle |
-| M3 Daily Operations | NOT STARTED | 0% | Timetable + attendance + assignments + announcements |
-| M4 Fees & Examinations | NOT STARTED | 0% | Financial/exam integrity gates |
-| M5 Cross-Platform & Offline Beta | NOT STARTED | 0% | Desktop/mobile + selective offline |
-| M6 Production 1.0 Hardening | NOT STARTED | 0% | Security + backup + upgrade + docs + release |
+| Milestone | State | Completion |
+|---|---|---:|
+| M0 Product & Architecture Foundation | IN PROGRESS | 57% |
+| M1 Installable Platform Alpha | IN PROGRESS (parallel foundation) | ~24% |
+| M2 Students & Academic Core | NOT STARTED | 0% |
+| M3 Daily Operations | NOT STARTED | 0% |
+| M4 Fees & Examinations | NOT STARTED | 0% |
+| M5 Cross-Platform & Offline Beta | NOT STARTED | 0% |
+| M6 Production 1.0 Hardening | NOT STARTED | 0% |
 
 Percentages are task-state progress, not production-feature percentages.
 
-## 2. Active / blocked work
+## Active / blocked work
 
-- **M0-003 replacement name:** current codename rejected as final brand; external screening required.
-- **M0-031 Drizzle/PostgreSQL POC:** real registry + PostgreSQL execution required; static SQL is not completion evidence.
-- **M0-052..059 UI primitives:** blocked by unresolved React/Vite dependency environment; specs are complete.
-- **M0-061 design catalog:** docs exist; executable real-component catalog still required.
-- **M1-002 / M1-038 installer integration:** REVIEW until committed Fastify/Vitest suites execute with actual dependencies.
-- **M1-033 permission seed:** IN PROGRESS / DB blocked; versioned permission catalog is ready as seed source.
-- **M1-066 unauthorized API suite:** still requires real protected routes and authoritative actor/scope loading.
+- M0-003 replacement name: external screening required.
+- M0-031 Drizzle/PostgreSQL POC: real registry + PostgreSQL execution required.
+- M0-052..059 UI primitives: implementation blocked by unresolved React/Vite dependency environment.
+- M0-061 design catalog: executable real-component catalog still required.
+- M1-002/M1-038 installer integration: REVIEW until real Fastify/Vitest execution.
+- M1-033 permission seed: seed source ready; database persistence pending.
+- M1-055/M1-056/M1-058/M1-059: authentication/session core exists; persistence and HTTP integration pending.
+- M1-066 protected-route security suite: requires persisted identity/authorization context.
 
-## 3. Completed M0 foundation
+## Completed M0 foundation
 
-- Product/security baseline M0-001/M0-002/M0-005.
-- Repository/tooling M0-010..021.
-- Fastify POC M0-030 PASSED before Actions pause.
-- Platform contracts M0-070..078 complete (9/9).
-- Design definition M0-050/M0-051/M0-060 complete; M0-052..059 specs ready.
+- M0-001/M0-002/M0-005 product/security baseline.
+- M0-010..021 repository/tooling foundation.
+- M0-030 Fastify POC PASSED before Actions pause.
+- M0-070..078 platform contracts complete.
+- M0-050/M0-051/M0-060 design definition complete.
 
-## 4. Completed M1 installer/security foundation
+## Completed M1 installer/security foundation
 
 DONE: M1-001, M1-003, M1-004, M1-005, M1-030, M1-036, M1-037 and M1-085.  
-Evidence: `apps/server/src/installation/` and `docs/pocs/installer-foundation.md`.
+Evidence: `apps/server/src/installation/`, `docs/pocs/installer-foundation.md`.
 
-## 5. Completed M1 authorization foundation
+## Completed M1 authorization foundation
 
-Evidence: `apps/server/src/authorization/` and `docs/pocs/authorization-foundation.md`.
+DONE: M1-060, M1-061, M1-062 and M1-063.  
+Evidence: `apps/server/src/authorization/`, `docs/pocs/authorization-foundation.md`.
 
-- **M1-060 permission registry DONE:** stable versioned namespaced IDs; unknown permissions fail closed.
-- **M1-061 default role templates DONE:** 12 PRD templates; runtime never branches on role names; scope strategy is enforced; full-permission template explicitly enumerates the current catalog.
-- **M1-062 server authorization service DONE:** explicit grants + trusted target context, disabled-user denial, bulk all-target authorization, generic 403 boundary.
-- **M1-063 scope POC DONE:** institution/branch/session/class/subject dimensions plus own-record and linked-child relations; missing/empty dimension context fails closed.
+## Completed M1 identity foundation
 
-### Authorization trust boundary
+- **M1-053 authentication session transport — DONE.** ADR-025 is accepted by amendment.
+- **M1-054 password hashing implementation — DONE.** Versioned asynchronous `scrypt` records with migration metadata are implemented.
 
-Actor relationships and target scope must come from authoritative server-side resolution. Client-supplied IDs are not proof of ownership, school membership, class assignment, or guardian linkage.
+Evidence: `apps/server/src/identity/`, `docs/pocs/identity-auth-foundation.md`, `docs/decision-amendments.md`.
 
-### Executed evidence
+Meaningful core implementation also exists for:
 
-No GitHub Actions or new dependencies were used. A strict local TypeScript compile and executable Node harness passed catalog consistency, scope-escalation rejection, teacher assignment boundaries, disabled actors, unknown permissions, student self-access, guardian linked-child access, bulk denial, and stable 403 behavior. Permanent Vitest tests encode the same invariants.
+- M1-055 sign-in service;
+- M1-056 session revocation lifecycle;
+- M1-058 login throttling service;
+- M1-059 authenticated principal/authorization-context loading.
 
-## 6. Next long-tranche order
+Those tasks remain IN PROGRESS until PostgreSQL repositories and real HTTP integration exist.
+
+## Execution evidence
+
+No GitHub Actions or new dependencies were used for the identity tranche.
+
+Local evidence:
+
+- strict identity-core TypeScript check: PASS;
+- executable identity/session harness: PASS;
+- permanent Vitest coverage committed for password and transport primitives.
+
+Full workspace Fastify/Vitest execution remains pending because repository dependencies are unavailable in the current runtime. Local Node 22 evidence does not close the project Node 24 support-matrix gate.
+
+## Next long-tranche order
 
 1. M0-031 real Drizzle/PostgreSQL proof.
-2. M0-004 Node/PostgreSQL support matrix.
-3. Execute M1-002/M1-038 installer Fastify/Vitest verification outside Actions.
-4. M1-013 + M1-031..035 DB-backed installer work after M0-031.
-5. M1 identity persistence/auth M1-050..059, consuming the completed authorization service.
-6. M1-052 persistence + M1-066 protected API attack suite, then M1-064 RLS decision from real DB context evidence.
-7. M0-032..038 Tauri POCs then M0-039 architecture lock.
-8. M0-052..059 + M0-061 React design system once dependencies resolve normally.
-9. M0 gate review.
+2. M0-004 supported Node/PostgreSQL matrix.
+3. Execute M1-002/M1-038 integration verification outside Actions.
+4. M1-050..052 identity/authorization persistence plus M1-033 permission seed.
+5. Finish M1-055/M1-056/M1-058/M1-059 with persisted repositories + Fastify routes + audit integration.
+6. M1-057 password reset/change flows.
+7. M1-066 protected-route attack suite, then M1-064 RLS decision.
+8. M1-013 + M1-031..035 database-backed installer completion.
+9. M0-032..038 Tauri POCs and M0-039 architecture lock.
+10. M0-052..059 + M0-061 design-system implementation when dependencies resolve normally.
+11. M0 gate review.
 
-## 7. Open decisions
+## Decision state
 
-ADR-006 Vite, ADR-007 Tauri, ADR-008 Fastify final lock, ADR-009 Drizzle, ADR-012 PostgreSQL jobs, ADR-015 RLS, ADR-020 OpenAPI typed-client evidence, ADR-023 replacement brand, ADR-025 auth transport, ADR-026 finance scope.
+ADR-025 authentication transport is **ACCEPTED** by `docs/decision-amendments.md`.
 
-## 8. Risk focus
+Still open/provisional: Vite, Tauri, final Fastify/Drizzle lock, PostgreSQL jobs, RLS, typed-client evidence, replacement brand and finance scope.
 
-Critical controls now explicitly cover installer lock/CSRF/secrets, no hardcoded role authorization, no silent new-permission escalation, fail-closed missing scope, trusted server-side target resolution, cross-institution leakage prevention, and honest REVIEW state while Actions are paused.
-
-## 9. Repository policy
+## Repository policy
 
 Direct-to-`main` only; no branches/PRs; no new Actions; existing Actions manual-only; no bot commits; no hand-edited lockfile; one coherent final commit per tranche.
 
-## 10. Resume pointer
+## Resume pointer
 
-> Continue in long tranches. M0-031 remains the primary architecture blocker. Installer core M1-001/003/004/005/030/036/037/085 is DONE; M1-002/M1-038 remain REVIEW. Authorization M1-060..063 is DONE with executable core evidence; M1-033 is seed-ready but DB-blocked and M1-066 still requires protected API integration. Never hardcode role names, trust client scope IDs, hand-edit dependencies, use GitHub Actions while quota is paused, or create permanent branding under the temporary codename.
+> Continue in long tranches. M0-031 remains the main architecture blocker. M1-053/M1-054 are DONE; M1-055/M1-056/M1-058/M1-059 have core implementations but require persistence and HTTP integration before DONE. Do not substitute in-memory production persistence, hand-edit dependencies, run GitHub Actions while quota is paused, or create permanent branding under the temporary codename.

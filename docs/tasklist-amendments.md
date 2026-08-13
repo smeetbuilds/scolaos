@@ -1,79 +1,73 @@
 # Tasklist Amendments — M0/M1
 
-`docs/project-tracker.md` is authoritative for current status. Stable IDs remain unchanged; this file records corrected/expanded task evidence until the master backlog is normalized.
+`docs/project-tracker.md` is authoritative for current status. Stable task IDs remain unchanged; this file records corrected/expanded task evidence until the master backlog is normalized.
 
 ## M0 state carried forward
 
-- [ ] **M0-003 [P1]** Replacement project name — IN PROGRESS; temporary codename rejected as final public brand.
+- [ ] **M0-003 [P1]** Replacement project name — IN PROGRESS.
 - [x] **M0-005 [P0]** Initial threat model.
 - [x] **M0-013..021** Repository/tooling quality foundation.
 - [x] **M0-030 [P0]** Fastify API POC.
-- [ ] **M0-031 [P0]** Drizzle/PostgreSQL POC — IN PROGRESS; real PostgreSQL + generated migration evidence required.
+- [ ] **M0-031 [P0]** Drizzle/PostgreSQL POC — real PostgreSQL/generated-migration evidence required.
 - [x] **M0-050 [P0]** Visual foundation.
 - [x] **M0-051 [P0]** Responsive strategy.
-- [ ] **M0-052..059** UI primitives — specs ready, implementation blocked by unresolved React/Vite dependencies.
-- [x] **M0-060 [P0]** Accessibility quality gate.
-- [ ] **M0-061 [P1]** Interactive design-system catalog — IN PROGRESS; static docs alone are insufficient.
-- [x] **M0-070..078** Platform-contract module complete (9/9).
+- [ ] **M0-052..059** UI primitives — specifications ready; implementation dependency-blocked.
+- [x] **M0-060 [P0]** Accessibility gate.
+- [ ] **M0-061 [P1]** Interactive design-system catalog — IN PROGRESS.
+- [x] **M0-070..078** Platform-contract module complete.
 
-## Early M1 installer backend/security tranche
+## M1 installer/security foundation
 
-DONE with executable core evidence:
+DONE: M1-001, M1-003, M1-004, M1-005, M1-030, M1-036, M1-037 and M1-085.  
+REVIEW: M1-002 and M1-038 pending actual Fastify/Vitest execution.
 
-- [x] **M1-001 [P0]** explicit unconfigured/configured/installed boot states.
-- [x] **M1-003 [P0]** validated, atomic and restrictive server config persistence.
-- [x] **M1-004 [P0]** generated server security secrets.
-- [x] **M1-005 [P0]** structured secret/error redaction.
-- [x] **M1-030 [P0]** exclusive installer lock.
-- [x] **M1-036 [P0]** permanent installer mutation lock after verified finalization.
-- [x] **M1-037 [P0]** installer CSRF/request-origin strategy.
-- [x] **M1-085 [P1]** request/log correlation IDs.
+Evidence: `apps/server/src/installation/`, `docs/pocs/installer-foundation.md`.
 
-REVIEW pending real Fastify/Vitest execution:
+## M1 authorization foundation
 
-- [ ] **M1-002 [P0]** restrict unconfigured server to installer-safe routes.
-- [ ] **M1-038 [P0]** installer security integration tests.
+- [x] **M1-060 [P0]** Permission registry.
+- [x] **M1-061 [P0]** Default role templates.
+- [x] **M1-062 [P0]** Server authorization service.
+- [x] **M1-063 [P0]** Scope-model POC.
 
-## M1 authorization foundation tranche
+Evidence: `apps/server/src/authorization/`, `docs/pocs/authorization-foundation.md`.
 
-- [x] **M1-060 [P0] Permission registry — DONE.**  
-  **Evidence:** `apps/server/src/authorization/permissions.ts`, tests, `docs/pocs/authorization-foundation.md`.  
-  **Locks:** stable namespaced IDs, versioned catalog, unknown-permission fail-closed behavior.
+Related DB/client tasks remain open: M1-033, M1-052, M1-064, M1-065 and M1-066.
 
-- [x] **M1-061 [P0] Default role templates — DONE.**  
-  **Evidence:** `apps/server/src/authorization/roles.ts`.  
-  **Locks:** 12 initial PRD role templates; runtime never authorizes by role name; materialization enforces the role's scope strategy; Super Administrator explicitly enumerates the current catalog so new permissions require review.
+## M1 identity/authentication foundation
 
-- [x] **M1-062 [P0] Server authorization service — DONE.**  
-  **Evidence:** `service.ts`, `scope.ts`, tests.  
-  **Locks:** disabled actor denial, explicit grants, trusted targets, fail-closed scopes, all-target bulk authorization, generic `PERMISSION_DENIED` 403.
+- [x] **M1-053 [P0] Authentication session transport ADR — DONE.**  
+  **Evidence:** ADR-025 amendment, `apps/server/src/identity/transport.ts`, `session-token.ts`, `csrf.ts`, `service.ts`, `docs/pocs/identity-auth-foundation.md`.  
+  **Decision:** opaque server-side sessions; browser cookie transport; native bearer transport; explicit revocation/expiry; session-bound browser CSRF primitive.
 
-- [x] **M1-063 [P0] Scope model POC — DONE.**  
-  **Proven:** institution/branch/session/class-section/subject dimensions, own-record and linked-child scopes, missing-target fail-closed behavior, and no implicit-global empty dimension scope.
+- [x] **M1-054 [P0] Password hashing implementation — DONE.**  
+  **Evidence:** `apps/server/src/identity/password.ts`, permanent tests, local executable harness.  
+  **Locks:** versioned asynchronous `scrypt` record, random salt, normalization, constant-time verification and upgrade metadata.
 
-Related tasks intentionally open:
+Substantial core implementation exists but tasks remain open:
 
-- [ ] **M1-033 [P0]** Seed default permission catalog — IN PROGRESS / DB blocked; versioned catalog is the seed source, persistence waits for Drizzle/PostgreSQL.
-- [ ] **M1-052 [P0]** Role/permission/assignment schemas — semantics ready; DB schema/persistence pending.
-- [ ] **M1-064 [P0]** RLS ADR — scope semantics proven; PostgreSQL connection-role/context evidence required.
-- [ ] **M1-065 [P0]** Permission-aware client navigation — blocked on executable React client foundation; UI remains UX only, never enforcement.
-- [ ] **M1-066 [P0]** Unauthorized API integration suite — pure unit evidence is not enough; real protected routes must load actor/grants/relationships from authoritative persistence.
+- [ ] **M1-055 [P0]** Login endpoint/UI — IN PROGRESS. `AuthenticationService.signIn()` exists; PostgreSQL repository, Fastify route, audit integration and UI remain.
+- [ ] **M1-056 [P0]** Logout/session revocation — IN PROGRESS. Core session revocation/expiry exists; persistent repository/endpoints/session UX remain.
+- [ ] **M1-057 [P0]** Forgot/reset password — OPEN.
+- [ ] **M1-058 [P0]** Login rate limiting/brute-force controls — IN PROGRESS. Account throttling service/policy exists; persistent store and HTTP/source integration remain.
+- [ ] **M1-059 [P0]** Current-user/permission context endpoint — IN PROGRESS. Authenticated principal resolves into the existing authorization actor; persistence/endpoint remain.
 
-## Authorization security rules
+Identity persistence tasks M1-050..052 remain open until the PostgreSQL/Drizzle stack is proven.
 
-- Never branch authorization on role names.
-- Never treat client-supplied scope IDs as proof of access.
-- Build actor/target context from trusted server-side resolution.
-- Missing required target dimensions fail closed.
-- Empty dimension grants match nothing; broad access is explicit.
-- Bulk operations authorize every target.
+## Identity acceptance boundary
+
+- In-memory stores are test fixtures only, never production persistence.
+- Raw session credentials must not be stored as lookup keys.
+- Current account/permission state must be loaded from authoritative server persistence.
+- Password create/change flows still require compromised/common-password screening before completion.
+- Login/logout/current-user tasks are not DONE until persisted repositories + real protected HTTP integration are tested.
 
 ## Main-only / Actions policy
 
 - direct-to-`main` only;
 - no feature branches or pull requests;
 - one coherent final commit per tranche;
-- no new GitHub Actions workflows; existing Actions stay manual-only while quota is constrained;
+- no new GitHub Actions workflows; existing Actions remain manual-only;
 - no automated dependency branches/PRs or bot commits;
 - do not hand-edit `pnpm-lock.yaml`.
 

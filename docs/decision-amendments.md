@@ -32,6 +32,55 @@ The repository must not create additional permanent branding dependencies on thi
 
 ---
 
+## ADR-025 Amendment — Authentication session transport
+
+**Effective:** 13 August 2026  
+**Status:** ACCEPTED  
+**Supersedes:** ADR-025 OPEN state in `docs/decision.md`.
+
+### Decision
+
+Use **opaque server-side sessions** for first-party authentication rather than self-contained JWT authorization claims.
+
+Transport by client class:
+
+- **Web/browser:** opaque session credential in an HttpOnly cookie. Production HTTPS uses a `__Host-` cookie with `Secure`, `Path=/`, no Domain and `SameSite=Lax`. Insecure cookies require explicit local-development opt-in only.
+- **Desktop/mobile:** the same opaque credential class is carried as `Authorization: Bearer ...` and must be stored only through the approved native secure-storage platform bridge.
+
+Server persistence stores only a cryptographic hash of each session credential. The raw credential is returned only when the session is issued.
+
+### Session model
+
+- Multiple concurrent device sessions are supported.
+- Sessions have idle and absolute expiry.
+- Individual sessions and all/other sessions can be revoked.
+- Disabled users, revoked sessions, expired sessions and missing principals fail closed.
+- Current authorization grants and relationship context are resolved from authoritative server-side state during authentication rather than copied into long-lived client-controlled claims.
+
+### CSRF model
+
+Browser credentials are cookies, so unsafe browser mutations require a CSRF defense. The core provides a token HMAC-bound to the server session. HTTP integration must combine this with origin/fetch-site validation and must never treat SameSite alone as the complete CSRF control.
+
+Native bearer credentials are not ambient browser cookies and therefore do not use the browser-cookie CSRF mechanism.
+
+### Why
+
+This model directly supports self-hosted operation, predictable revocation, multiple devices, permission/account changes taking effect without waiting for JWT expiry, native secure storage, and straightforward audit/session management.
+
+### Evidence
+
+Implementation and executed core evidence are recorded in `apps/server/src/identity/` and `docs/pocs/identity-auth-foundation.md`.
+
+### Consequences
+
+- `M1-053` is DONE.
+- Session persistence is a server-side database concern and must be designed with M1 identity schemas.
+- Browser login/logout endpoints must set/clear the approved cookie attributes and enforce the CSRF/origin contract.
+- Native clients must never place the bearer credential in ordinary preferences/local storage.
+- A future switch to JWT/self-contained authorization requires a new ADR with explicit revocation, permission-freshness and self-hosting analysis.
+
+---
+
 ## Amendment normalization rule
 
-When `docs/decision.md` is next normalized, replace ADR-023 with this decision without changing unrelated accepted ADRs.
+When `docs/decision.md` is next normalized, fold ADR-023 and ADR-025 into the main decision log without changing unrelated accepted ADRs.
