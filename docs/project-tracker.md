@@ -4,7 +4,7 @@
 **Current milestone:** `M0 — Product & Architecture Foundation`  
 **Last updated:** 13 August 2026
 
-This file is the authoritative compact execution state for the project currently stored in `smeetbuilds/scolaos`. Detailed definitions live in `tasklist.md`, `tasklist-amendments.md`, `docs/contracts/`, `docs/pocs/` and the ADR files.
+This file is the authoritative compact execution state for the project currently stored in `smeetbuilds/scolaos`. Detailed definitions live in `tasklist.md`, `tasklist-amendments.md`, `docs/contracts/`, `docs/design-system/`, `docs/pocs/` and the ADR files.
 
 ---
 
@@ -12,7 +12,7 @@ This file is the authoritative compact execution state for the project currently
 
 | Milestone | State | Completion | Exit gate |
 |---|---|---:|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 51% | Architecture POCs + reproducible quality gates + design foundations |
+| M0 Product & Architecture Foundation | IN PROGRESS | 57% | Architecture POCs + reproducible quality gates + design foundations |
 | M1 Installable Platform Alpha | NOT STARTED | 0% | Installer + auth + permissions + health |
 | M2 Students & Academic Core | NOT STARTED | 0% | Academic structure + secure student lifecycle |
 | M3 Daily Operations | NOT STARTED | 0% | Timetable + attendance + assignments + announcements |
@@ -21,7 +21,7 @@ This file is the authoritative compact execution state for the project currently
 | M6 Production 1.0 Hardening | NOT STARTED | 0% | Security + backup + upgrade + docs + release |
 | M7+ Extended Modules | DEFERRED | 0% | Post-1.0 module gates |
 
-The percentage is task-state progress, not a claim that 51% of production functionality exists.
+The percentage is task-state progress, not a claim that 57% of production functionality exists.
 
 ---
 
@@ -62,6 +62,27 @@ Still required before DONE:
 
 Static SQL review is not completion evidence.
 
+### M0-061 — design-system documentation/demo workspace
+
+**State:** IN PROGRESS.
+
+Prepared:
+
+- `docs/design-system/README.md` documentation workspace;
+- `docs/design-system/component-specs.md` implementation specification for M0-052..059;
+- completed visual/responsive/accessibility definition docs.
+
+Still required before DONE:
+
+- executable component demo/catalog using the real `packages/ui` components;
+- representative component states;
+- responsive examples;
+- accessibility/keyboard examples;
+- long/localized content examples;
+- reduced-motion examples.
+
+Static Markdown alone is not completion evidence for the demo requirement.
+
 ---
 
 ## 3. Next execution order
@@ -70,8 +91,9 @@ Static SQL review is not completion evidence.
 2. `M0-004` lock Node/PostgreSQL support matrix from Fastify + database evidence.
 3. `M0-032..038` Tauri desktop/mobile/camera/secure-storage/notification proof set and decision.
 4. `M0-039` accept/reject Fastify + Drizzle architecture from combined evidence.
-5. `M0-050..061` design-system foundation, without permanent branding while M0-003 is open.
-6. M0 gate review after the remaining architecture/design work is executable and documented.
+5. Implement `M0-052..059` shared design-system primitives against the now-locked M0-050/M0-051/M0-060 specifications.
+6. Finish `M0-061` interactive design-system demo/catalog after real components exist.
+7. M0 gate review after remaining architecture/design work is executable and documented.
 
 The **M0-070..078 platform-contract module is complete** and no longer appears in the pending queue.
 
@@ -125,6 +147,36 @@ The **M0-070..078 platform-contract module is complete** and no longer appears i
 
 Contract completion defines required behavior. It does not claim every adapter/provider/persistence layer is already implemented.
 
+### Design-system definition tranche
+
+- `M0-050` visual direction **DONE** — `docs/design-system/visual-foundation.md`.
+  - semantic token architecture;
+  - typography/spacing/density/radii/elevation;
+  - restrained color/status system;
+  - icon/focus/motion rules;
+  - data/form hierarchy;
+  - naming-independent brand layer.
+
+- `M0-051` responsive layout principles **DONE** — `docs/design-system/responsive-layout.md`.
+  - reference layout bands/gutters;
+  - adaptive desktop/tablet/mobile shell behavior;
+  - action prioritization;
+  - forms/overlays;
+  - explicit table narrow-screen strategies;
+  - touch/pointer/keyboard;
+  - zoom/localization/responsive acceptance checklist.
+
+- `M0-060` accessibility gate **DONE** — `docs/design-system/accessibility.md`.
+  - WCAG 2.2 AA-oriented semantics;
+  - keyboard/focus;
+  - contrast/touch/zoom/reflow;
+  - forms/overlays/tables/custom widgets;
+  - dates/timetables/charts;
+  - reduced motion/high contrast;
+  - manual + automated component test matrix.
+
+- M0-052..059 implementation specifications prepared in `docs/design-system/component-specs.md`; tasks remain open until actual components/tests exist.
+
 ---
 
 ## 5. Architecture/product decisions still open
@@ -162,6 +214,9 @@ Contract completion defines required behavior. It does not claim every adapter/p
 | Clients diverge across releases | High | M0-072 API major/capability compatibility discipline |
 | Large lists become unstable/slow | High | M0-071 stable cursors + allow-listed queries + async exports |
 | Platform-specific code contaminates features | High | M0-073 bridge + M0-077 dependency boundaries |
+| Design system fragments by module | High | M0-050/M0-051 locked semantics + M0-052..059 shared implementation only |
+| Mobile becomes shrunken desktop | High | M0-051 explicit composition/table/navigation strategies |
+| Accessibility is deferred until release | Critical | M0-060 component-level definition-of-done gate |
 | Tauri mobile limitations harm UX | High | platform POCs before ADR lock |
 | Actions quota hides regressions | High | auto Actions paused; never claim fresh CI evidence without execution |
 
@@ -178,10 +233,13 @@ Contract completion defines required behavior. It does not claim every adapter/p
 | M0-030 Fastify POC | ✅ PASSED |
 | M0-031 PostgreSQL POC | ⚠️ acceptance harness prepared; real execution pending |
 | Platform contracts M0-070..078 | ✅ 9/9 defined |
+| Design definition M0-050/M0-051/M0-060 | ✅ 3/3 defined |
+| Design primitives M0-052..059 | ⬜ specifications ready; implementation pending |
+| Design demo M0-061 | ⚠️ docs workspace ready; executable catalog pending |
 | Product-name clearance | ⚠️ current name rejected; replacement pending |
 | Automatic GitHub Actions | ⏸️ PAUSED by owner request |
 
-No new runtime code/dependencies were introduced by the contract tranche, so earlier executable evidence is not being misrepresented as validation of changed runtime behavior.
+No runtime source/dependencies/workflows are changed by the design-definition tranche, so earlier executable evidence is not being represented as validation of new component behavior.
 
 ---
 
@@ -202,4 +260,4 @@ No new runtime code/dependencies were introduced by the contract tranche, so ear
 
 If work stops and the user says **continue**:
 
-> `M0-031 remains the primary executable blocker. If a real PostgreSQL + package-registry-capable runtime is still unavailable, continue another independent M0 tranche that does not require pretending unvalidated runtime behavior is complete—prefer design-system foundation work or architecture documentation. The M0-070..078 platform-contract module is fully defined. Do not use GitHub Actions while the quota constraint is active and do not create permanent public branding under the temporary ScolaOS codename.`
+> `Prefer another long tranche, not one micro-task. M0-031 remains the primary executable blocker. If PostgreSQL/registry tooling is still unavailable, proceed with the actual M0-052..059 design-system implementation only in an environment where the new UI code can be typechecked/tested without GitHub Actions; otherwise continue non-runtime architecture work. M0-050, M0-051, M0-060 and all M0-070..078 contracts are defined. M0-061 remains open until an interactive component catalog exists. Do not use GitHub Actions while quota is constrained and do not create permanent branding under the temporary ScolaOS codename.`

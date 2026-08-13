@@ -40,50 +40,47 @@ This file records task-state changes discovered after the original master backlo
 
 ## Completed platform-contract module — 9/9
 
-- [x] **M0-070 [P0]** API error contract.  
-  **Evidence:** `docs/contracts/api-errors.md` plus previously validated Fastify behavior.  
-  **Locks:** envelope, machine codes, request correlation, validation details, HTTP mapping, sanitized disclosure.
+- [x] **M0-070 [P0]** API error contract — `docs/contracts/api-errors.md`.
+- [x] **M0-071 [P0]** Pagination/filter/sort contract — `docs/contracts/pagination.md`.
+- [x] **M0-072 [P0]** API compatibility/version metadata — `docs/contracts/api-compatibility.md`.
+- [x] **M0-073 [P0]** Platform-bridge interfaces — `docs/contracts/platform-bridge.md`.
+- [x] **M0-074 [P0]** Storage-provider interface — `docs/contracts/storage-provider.md`.
+- [x] **M0-075 [P0]** Notification event/channel interfaces — `docs/contracts/notification-events.md`.
+- [x] **M0-076 [P0]** Background-job contract — `docs/contracts/background-jobs.md`.
+- [x] **M0-077 [P0]** Module-boundary conventions — `docs/contracts/module-boundaries.md`, `eslint.config.mjs`, ADR-019.
+- [x] **M0-078 [P0]** Audit-event contract — `docs/contracts/audit-events.md`.
 
-- [x] **M0-071 [P0]** Pagination/filter/sort contract.  
-  **Evidence:** `docs/contracts/pagination.md`.  
-  **Locks:** opaque stable cursors, deterministic sort/tie-breakers, typed allow-listed filters/search, page-size limits, optional totals, async-export boundary.
+**Contract-completion rule:** a contract task is DONE when the shared behavioral boundary is precise enough for independent implementations to conform without inventing incompatible semantics. Provider/adapter/database/native execution tasks must still pass their own executable acceptance criteria.
 
-- [x] **M0-072 [P0]** API compatibility/version metadata.  
-  **Evidence:** `docs/contracts/api-compatibility.md`.  
-  **Locks:** `/api/v1` major boundary, additive/breaking rules, metadata/capabilities, deprecation and client/server compatibility behavior.
+## Design-system foundation tranche
 
-- [x] **M0-073 [P0]** Platform-bridge interfaces.  
-  **Evidence:** `docs/contracts/platform-bridge.md`.  
-  **Locks:** capability discovery, normalized platform failures, secure-storage/camera/files/notifications/deep-links/connectivity/share seams, dependency injection and security boundaries.  
-  **Important:** this does not mark Tauri capability POCs complete.
+Completed definition/gate tasks:
 
-- [x] **M0-074 [P0]** Storage-provider interface.  
-  **Evidence:** `docs/contracts/storage-provider.md`.  
-  **Locks:** private-by-default storage, application-owned metadata/authorization, opaque keys, atomic writes, idempotent delete, local/S3 portability and backup consistency.  
-  **Important:** concrete local/S3 adapters remain implementation work.
+- [x] **M0-050 [P0]** Define visual direction: typography, spacing, color semantics, radius, elevation, density.  
+  **Evidence:** `docs/design-system/visual-foundation.md`.  
+  **Locks:** semantic token architecture, neutral/institutional visual character, typography/spacing/density/radii/elevation/icon/focus/motion rules, data/form hierarchy, light-first theming and rename-safe branding separation.
 
-- [x] **M0-075 [P0]** Notification event/channel interfaces.  
-  **Evidence:** `docs/contracts/notification-events.md`.  
-  **Locks:** semantic intents, audience resolution, channel/template separation, delivery lifecycle, idempotency/retry, transaction/outbox boundary, privacy and observability.  
-  **Important:** email/push/SMS providers remain implementation work.
+- [x] **M0-051 [P0]** Define responsive layout principles and breakpoint strategy.  
+  **Evidence:** `docs/design-system/responsive-layout.md`.  
+  **Locks:** layout bands/gutters, desktop/tablet/mobile shell behavior, action prioritization, forms/overlays, table narrow-screen strategies, filters/search, touch/pointer/keyboard, text zoom/localization and feature responsive checklist.
 
-- [x] **M0-076 [P0]** Background-job contract.  
-  **Evidence:** `docs/contracts/background-jobs.md`.  
-  **Locks:** at-least-once semantics, job states, leases, retry classes, idempotency/dedupe, payload versioning, authorization context, scheduling/cancellation and dead-job visibility.  
-  **Important:** PostgreSQL-backed queue implementation remains provisional/unproven.
+- [x] **M0-060 [P0]** Establish component accessibility tests/checklist.  
+  **Evidence:** `docs/design-system/accessibility.md`.  
+  **Locks:** WCAG 2.2 AA-oriented semantics, keyboard/focus, contrast, touch, zoom/reflow, forms, overlays, tables/widgets, calendar/timetable, charts, reduced motion, screen-reader/manual + automated test matrix.
 
-- [x] **M0-077 [P0]** Module-boundary conventions.  
-  **Evidence:** `docs/contracts/module-boundaries.md`, `eslint.config.mjs`, ADR-019.  
-  **Locks:** default-deny dependency direction, modular-monolith ownership, test/production boundaries and exception process.
+Implementation specifications prepared but tasks remain open:
 
-- [x] **M0-078 [P0]** Audit-event contract.  
-  **Evidence:** `docs/contracts/audit-events.md`.  
-  **Locks:** actor/action/resource/outcome semantics, append-only history, transaction/correlation rules, sensitive-data prohibitions, read authorization, retention and bulk-operation behavior.  
-  **Important:** audit persistence/admin UX remain M1-080/M1-081.
-
-## Contract-completion rule
-
-A contract task is DONE when the shared behavioral boundary is precise enough for independent implementations to conform without inventing incompatible semantics. This is distinct from implementation completion. Provider/adapter/database/native execution tasks must still pass their own executable acceptance criteria.
+- [ ] **M0-052 [P0]** Button/IconButton/Link primitives — spec prepared in `docs/design-system/component-specs.md`; implementation/tests pending.
+- [ ] **M0-053 [P0]** Form primitives/validation — spec prepared; implementation/tests pending.
+- [ ] **M0-054 [P0]** Dialog/Sheet/Popover/Tooltip — spec prepared; implementation/tests pending.
+- [ ] **M0-055 [P0]** Navigation primitives — spec prepared; implementation/tests pending.
+- [ ] **M0-056 [P0]** Table/data-list foundation — spec prepared; implementation/tests pending.
+- [ ] **M0-057 [P0]** Empty/loading/error/status primitives — spec prepared; implementation/tests pending.
+- [ ] **M0-058 [P1]** Date/time/calendar primitives — spec prepared; implementation/tests pending.
+- [ ] **M0-059 [P1]** Chart wrapper/metric components — spec prepared; implementation/tests pending.
+- [ ] **M0-061 [P1]** Design-system documentation/demo workspace — **IN PROGRESS**.  
+  **Prepared:** `docs/design-system/README.md` documentation workspace + component specification catalog.  
+  **Still required:** executable interactive demo/catalog rendering the real `packages/ui` components and representative responsive/accessibility states. Static Markdown alone is not completion evidence.
 
 ## Main-only workflow policy
 

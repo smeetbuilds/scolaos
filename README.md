@@ -32,6 +32,13 @@ The current architecture baseline is intentionally evidence-driven:
 - REST/OpenAPI boundary
 - Guided web installer at `/start/installation`
 
+Completed architecture-definition modules:
+
+- **Platform contracts M0-070..078:** complete — [`docs/contracts/README.md`](docs/contracts/README.md)
+- **Design definition:** M0-050 visual foundation, M0-051 responsive strategy and M0-060 accessibility gate complete — [`docs/design-system/README.md`](docs/design-system/README.md)
+
+Concrete design-system components M0-052..059 and the interactive M0-061 component catalog are still implementation work.
+
 Material architecture changes are recorded in [`docs/decision.md`](docs/decision.md). Active decision corrections discovered after the baseline log are recorded in [`docs/decision-amendments.md`](docs/decision-amendments.md) until normalization.
 
 ## Repository layout
@@ -48,7 +55,7 @@ packages/
   config/       shared configuration primitives
 tooling/        repository tooling and test infrastructure
 tests/e2e/      browser E2E suite
-docs/           PRD, architecture, threat model, ADRs, task tracker, module PRDs
+docs/           PRD, architecture, contracts, design system, ADRs, tracker, module PRDs
 ```
 
 ## Project documentation
@@ -59,12 +66,21 @@ Start here:
 - [Architecture / design](docs/design.md)
 - [Architecture decisions](docs/decision.md)
 - [Decision amendments](docs/decision-amendments.md)
+- [Platform contracts](docs/contracts/README.md)
+- [Design-system workspace](docs/design-system/README.md)
+- [Visual foundation](docs/design-system/visual-foundation.md)
+- [Responsive layout strategy](docs/design-system/responsive-layout.md)
+- [Accessibility quality gate](docs/design-system/accessibility.md)
+- [Component implementation specifications](docs/design-system/component-specs.md)
 - [Brand/name screening](docs/brand-screening.md)
 - [Threat model](docs/threat-model.md)
 - [Master execution tasklist](docs/tasklist.md)
+- [Tasklist amendments](docs/tasklist-amendments.md)
 - [Live project tracker](docs/project-tracker.md)
 - [Dependency policy](docs/dependency-policy.md)
 - [Release/change process](docs/releasing.md)
+- [Fastify API POC](docs/pocs/fastify-api.md)
+- [Drizzle/PostgreSQL POC plan](docs/pocs/drizzle-postgres.md)
 - [Installer & self-hosting PRD](docs/prds/001-installer-self-hosting.md)
 - [Identity & access PRD](docs/prds/002-identity-access.md)
 - [School core PRD](docs/prds/003-school-core.md)
@@ -72,7 +88,7 @@ Start here:
 - [Platform operations PRD](docs/prds/005-platform-operations.md)
 - [Module roadmap](docs/prds/006-module-roadmap.md)
 
-`docs/project-tracker.md` is the authoritative execution status and contains the exact resume pointer.
+`docs/project-tracker.md` is the authoritative execution status and contains the exact resume pointer. `docs/tasklist-amendments.md` supersedes stale M0 checkboxes in the original baseline tasklist until backlog normalization is completed.
 
 ## Development baseline
 
@@ -105,7 +121,7 @@ The generated `pnpm-lock.yaml` is committed. Dependency manifest changes must re
 
 ## Repository workflow
 
-During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent final commit per implementation batch.
+During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent final commit per implementation tranche.
 
 ## Continuous quality
 
