@@ -1,0 +1,15 @@
+node_modules/
+.pnpm-store/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+playwright-report/
+test-results/
+dist/
+build/
+.vite/
+*.log
+*.local
+apps/shell/src-tauri/target/

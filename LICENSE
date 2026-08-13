@@ -1,0 +1,13 @@
+ScolaOS
+Copyright (C) 2026 Smeet Ghori and ScolaOS contributors
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+ScolaOS is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License version 3 as published by the Free Software Foundation, with no later-version option implied by this notice.
+
+ScolaOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+The canonical GNU Affero General Public License version 3 text is available from the Free Software Foundation at:
+https://www.gnu.org/licenses/agpl-3.0.html
+
+A repository release intended for distribution must include the complete canonical AGPL-3.0 license text. Tracking: M0-002 / M6-091.
