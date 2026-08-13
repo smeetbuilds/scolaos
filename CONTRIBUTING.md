@@ -4,10 +4,24 @@ ScolaOS is early-stage. Contributions are welcome, but the architecture and exec
 
 ## Before changing code
 
-1. Read `docs/prd.md`, `docs/design.md`, and `docs/decision.md`.
+1. Read `docs/prd.md`, `docs/design.md`, `docs/decision.md`, and `docs/threat-model.md`.
 2. Check `docs/project-tracker.md` for the current milestone and resume pointer.
 3. Find the relevant stable task ID in `docs/tasklist.md`.
 4. If your change contradicts an accepted ADR, update the ADR explicitly in the same change rather than silently diverging.
+
+## Local quality gates
+
+Run the relevant commands before review:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test:unit
+pnpm build
+```
+
+Run `pnpm test:e2e` when browser behavior or the E2E harness is affected.
 
 ## Engineering definition of done
 
@@ -15,12 +29,14 @@ A feature is not done because its happy path renders. Apply the relevant gates f
 
 ## Change discipline
 
+- Use a Conventional Commit-style subject described in `docs/releasing.md`.
 - Keep commits focused and descriptive.
 - Do not edit already-released database migrations; add a new migration.
 - Do not place critical authorization or financial rules only in client code.
 - Do not introduce a mandatory hosted/proprietary service without an ADR.
-- New dependencies require a maintenance, security, and license-compatibility check.
+- New dependencies require the review in `docs/dependency-policy.md`.
 - Avoid country-specific assumptions in core academic/domain models unless implemented as configuration or an adapter.
+- Architecture, security, CI, server, and documentation changes require the CODEOWNER while the project has a single maintainer.
 
 ## License of contributions
 

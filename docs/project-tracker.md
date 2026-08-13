@@ -4,7 +4,7 @@
 **Current milestone:** `M0 — Product & Architecture Foundation`  
 **Last updated:** 13 August 2026
 
-This file is the compact state of the project. Update it whenever meaningful work lands. Detailed work items live in `tasklist.md`.
+This file is the authoritative compact execution state of the project. Detailed work-item definitions live in `tasklist.md` plus post-baseline additions in `tasklist-amendments.md`. If an older checkbox disagrees with a same-ID status recorded here, this tracker wins until backlog normalization.
 
 ---
 
@@ -12,7 +12,7 @@ This file is the compact state of the project. Update it whenever meaningful wor
 
 | Milestone | State | Completion | Entry criteria | Exit gate |
 |---|---|---:|---|---|
-| M0 Product & Architecture Foundation | IN PROGRESS | 10% | Planning pack accepted | Architecture POCs + CI + design foundations |
+| M0 Product & Architecture Foundation | IN PROGRESS | 28% | Planning pack accepted | Architecture POCs + CI + design foundations |
 | M1 Installable Platform Alpha | NOT STARTED | 0% | M0 gate | Web install + auth + permissions + health |
 | M2 Students & Academic Core | NOT STARTED | 0% | M1 gate | Academic structure + secure student lifecycle |
 | M3 Daily Operations | NOT STARTED | 0% | M2 gate | Timetable + attendance + assignments + announcements |
@@ -31,38 +31,51 @@ None at commit boundary.
 
 ### NEXT — exact execution order
 
-1. `M0-013` Configure linting/formatting/import-boundary rules.
-2. `M0-014` Configure unit-test framework.
-3. `M0-015` Configure Playwright E2E harness.
-4. `M0-016` Configure CI for install/typecheck/lint/test/build.
-5. `M0-017` Configure dependency update policy.
-6. `M0-018` Configure secret scanning and dependency vulnerability scanning.
-7. `M0-019` Add change/release/changelog process.
-8. `M0-030` Fastify API POC.
-9. `M0-031` Drizzle/PostgreSQL migration POC.
-10. `M0-032..038` Tauri desktop/mobile proof set and architecture decision.
+1. `M0-021` Generate/commit `pnpm-lock.yaml` from the approved CI toolchain and switch CI/security installs to `--frozen-lockfile`.
+2. `M0-030` Fastify API POC with validation, error envelope, request IDs, auth hook stub, and OpenAPI generation.
+3. `M0-031` Drizzle/PostgreSQL migration POC + integration tests; use evidence to lock supported PostgreSQL matrix.
+4. `M0-004` Confirm supported server environment after API/database POCs.
+5. `M0-032..038` Tauri desktop/mobile proof set and Tauri ADR decision.
+6. `M0-039` Decide Fastify/Drizzle ADRs based on POC results.
+7. `M0-050..061` Design-system foundation.
+8. `M0-070..078` Platform contracts.
+9. `M0-GATE` M0 release gate review.
 
-### BLOCKED
+### BLOCKED / EXTERNAL VALIDATION
 
-None yet.
+- `M0-003` Product-name trademark/domain conflict screening remains intentionally open. Repository/name availability alone is not a legal trademark clearance.
+- `M0-021` Lockfile cannot be generated in the current execution container because outbound npm access is unavailable; CI is configured to generate and upload it as a short-lived artifact.
 
 ### DONE
 
-Foundation landed:
+Product/security foundation:
 
 - `M0-001` Master PRD boundaries accepted as implementation baseline.
 - `M0-002` AGPL-3.0-only selected.
+- `M0-005` Initial threat model created for installer, auth, scopes, files, finance, updates, backups, jobs, logs, and native/offline clients.
+
+Repository/tooling foundation:
+
 - `M0-010` Monorepo structure initialized.
 - `M0-011` pnpm workspaces selected.
 - `M0-012` Strict TypeScript baseline added.
+- `M0-013` ESLint flat config, Prettier, and monorepo import-boundary policy configured.
+- `M0-014` Vitest unit-test harness and V8 coverage configuration added.
+- `M0-015` Playwright Chromium E2E harness added.
+- `M0-016` CI workflow configured for formatting, lint, typecheck, unit tests, build, and E2E harness.
+- `M0-017` Weekly Dependabot policy configured for npm and GitHub Actions.
+- `M0-018` Dependency-audit workflow configured; public-repository GitHub secret scanning documented as baseline.
+- `M0-019` Conventional change/changelog/release process added.
+- `M0-020` CODEOWNERS and review checklist added for the current maintainer.
 
 Planning pack committed:
 
 - Master PRD.
 - Architecture/design baseline.
 - ADR/decision log.
-- Detailed execution tasklist.
+- Detailed execution tasklist + M0 amendments.
 - Live tracker.
+- Threat model.
 - Installer PRD.
 - Identity/access PRD.
 - School-core PRD.
@@ -105,6 +118,7 @@ Planning pack committed:
 | Local private uploads become publicly exposed | Critical | Medium | authorized file serving + path hardening + security tests | M6 |
 | Feature breadth destroys UX quality | High | High | milestone gating; role-specific IA; each module requires responsive UX acceptance | Always |
 | Open-source contributions erode architecture | Medium | Medium | module boundaries, ADRs, contribution docs, CI checks | M6+ |
+| Dependency/toolchain drift breaks reproducibility | High | Medium | exact pins, lockfile task, frozen CI after artifact commit, Dependabot | M0 |
 
 ---
 
@@ -112,16 +126,16 @@ Planning pack committed:
 
 | Gate | M0 | M1 | M2 | M3 | M4 | M5 | M6 |
 |---|---|---|---|---|---|---|---|
-| Typecheck/lint | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Unit tests | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Typecheck/lint | ⬜ CI run pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Unit tests | ⬜ CI run pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Integration tests | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| E2E critical paths | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| E2E critical paths | ⬜ CI harness pending | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Authorization tests | N/A | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Responsive review | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Accessibility review | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Performance review | POC | POC | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Security review | Threat model | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Docs updated | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Security review | ✅ initial threat model | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Docs updated | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 Legend: `⬜` pending, `✅` passed, `⚠️` passed with accepted issue, `❌` failed.
 
@@ -138,13 +152,13 @@ Allowed only when dependencies are satisfied or explicitly accepted as parallel 
 Requires:
 
 - implementation present;
-- local relevant tests pass;
+- local relevant tests pass where executable in the current environment;
 - acceptance criteria self-checked;
 - docs/ADR updated if behavior changed.
 
 ### REVIEW → DONE
 
-Requires reviewer/CI/quality gate pass appropriate to the task.
+Requires reviewer/CI/quality gate pass appropriate to the task. For repository-configuration tasks, `DONE` means the requested control is committed/configured; the milestone quality gate still remains pending until CI evidence exists.
 
 ### Any → BLOCKED
 
@@ -161,4 +175,4 @@ Record:
 
 If work stops and the user says **continue**, resume at:
 
-> `M0-013 — Configure linting/formatting/import-boundary rules`, then proceed through the `NEXT` queue without re-planning the whole project unless a discovered constraint invalidates an ADR.
+> `M0-021 — commit the CI-generated pnpm-lock.yaml and freeze installs`. If the CI artifact is unavailable or the workflow failed before generating it, diagnose/fix that workflow first in the same milestone, then continue to `M0-030`.

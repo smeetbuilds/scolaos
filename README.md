@@ -45,7 +45,8 @@ packages/
   api-client/   typed API client
   config/       shared configuration primitives
 tooling/        repository tooling and test infrastructure
-docs/           PRD, architecture, ADRs, task tracker, module PRDs
+tests/e2e/      browser E2E suite
+docs/           PRD, architecture, threat model, ADRs, task tracker, module PRDs
 ```
 
 ## Project documentation
@@ -55,8 +56,11 @@ Start here:
 - [Master PRD](docs/prd.md)
 - [Architecture / design](docs/design.md)
 - [Architecture decisions](docs/decision.md)
+- [Threat model](docs/threat-model.md)
 - [Master execution tasklist](docs/tasklist.md)
 - [Live project tracker](docs/project-tracker.md)
+- [Dependency policy](docs/dependency-policy.md)
+- [Release/change process](docs/releasing.md)
 - [Installer & self-hosting PRD](docs/prds/001-installer-self-hosting.md)
 - [Identity & access PRD](docs/prds/002-identity-access.md)
 - [School core PRD](docs/prds/003-school-core.md)
@@ -64,23 +68,40 @@ Start here:
 - [Platform operations PRD](docs/prds/005-platform-operations.md)
 - [Module roadmap](docs/prds/006-module-roadmap.md)
 
-The tracker contains the exact resume pointer for implementation.
+`docs/project-tracker.md` is the authoritative execution status and contains the exact resume pointer.
 
 ## Development baseline
 
 Current contributor baseline:
 
-- Node.js 24 LTS for development
-- pnpm 10+
+- Node.js 24
+- pnpm 11
 - PostgreSQL support will be pinned after the database POC (`M0-031`)
+- TypeScript 6.0.x is deliberately pinned until the selected lint stack supports TypeScript 7
 
 ```bash
 git clone https://github.com/smeetbuilds/scolaos.git
 cd scolaos
 pnpm install
+pnpm check
 ```
 
-Application packages are scaffolds at this stage; runnable development commands will land as their M0 tasks are completed.
+Useful commands:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test:unit
+pnpm test:e2e
+pnpm build
+```
+
+The first dependency install currently generates `pnpm-lock.yaml`. Task `M0-021` requires committing the generated lockfile and switching CI to frozen installs before architecture POCs proceed.
+
+## Continuous quality
+
+GitHub Actions runs formatting, lint, typecheck, unit tests, build, and a Chromium Playwright harness. A separate security workflow runs dependency auditing. Dependabot is configured for npm and GitHub Actions updates.
 
 ## License
 

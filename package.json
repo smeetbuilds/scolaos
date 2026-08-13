@@ -5,16 +5,35 @@
   "description": "The open-source operating system for schools.",
   "license": "AGPL-3.0-only",
   "type": "module",
+  "packageManager": "pnpm@11.18.0",
   "engines": {
     "node": ">=24 <25",
-    "pnpm": ">=10"
+    "pnpm": ">=11 <12"
   },
   "scripts": {
     "dev": "pnpm -r --parallel --if-present dev",
     "build": "pnpm -r --if-present build",
-    "typecheck": "pnpm -r --if-present typecheck",
-    "lint": "pnpm -r --if-present lint",
-    "test": "pnpm -r --if-present test",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm test:unit",
+    "test:unit": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.7.0",
+    "@playwright/test": "1.62.0",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-v8": "4.1.10",
+    "eslint": "10.7.0",
+    "eslint-plugin-boundaries": "7.1.0",
+    "globals": "17.7.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.65.0",
+    "vitest": "4.1.10"
   }
 }

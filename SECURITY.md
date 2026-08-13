@@ -16,4 +16,4 @@ Please include the affected revision/version, impact, reproducible steps or a mi
 
 High-priority areas include installer exposure, authentication/session handling, permission/scope bypass, school/branch isolation, private file access, uploads, financial integrity, update packages, backups/restores, background jobs, secrets, and API abuse.
 
-The active threat-model task is tracked as `M0-005`.
+The maintained initial threat model is [`docs/threat-model.md`](docs/threat-model.md). Dependency auditing is enforced by `.github/workflows/security.yml`; GitHub repository secret-scanning controls are part of the repository security baseline.
