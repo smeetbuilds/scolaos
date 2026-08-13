@@ -1,8 +1,11 @@
 import { buildApp } from './app.js';
 import { loadServerConfig } from './config.js';
+import { safeErrorForLog } from './installation/redaction.js';
+import { InstallationService } from './installation/service.js';
 
 const config = loadServerConfig();
-const app = await buildApp({ logger: true });
+const installationService = new InstallationService(config.dataDirectory);
+const app = await buildApp({ logger: true, installationService });
 let closing = false;
 
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
@@ -11,7 +14,7 @@ async function shutdown(signal: NodeJS.Signals): Promise<void> {
   }
 
   closing = true;
-  app.log.info({ signal }, 'Shutting down ScolaOS server');
+  app.log.info({ signal }, 'Shutting down server');
   await app.close();
 }
 
@@ -26,7 +29,7 @@ process.once('SIGTERM', () => {
 try {
   await app.listen({ host: config.host, port: config.port });
 } catch (error) {
-  app.log.error({ err: error }, 'Failed to start ScolaOS server');
+  app.log.error({ error: safeErrorForLog(error) }, 'Failed to start server');
   process.exitCode = 1;
   await app.close();
 }

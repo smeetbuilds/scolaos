@@ -5,6 +5,9 @@ import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
 
 import { pocAuthorizationHook, requireAuthContext } from './auth.js';
 import { createErrorEnvelope, ScolaApiError } from './errors.js';
+import { safeErrorForLog, STRUCTURED_LOG_REDACTION_PATHS } from './installation/redaction.js';
+import { isInstallerSafePath, registerInstallerRoutes } from './installation/routes.js';
+import { InstallationService } from './installation/service.js';
 import {
   echoBodySchema,
   echoResponseSchema,
@@ -19,6 +22,7 @@ interface EchoBody {
 
 export interface BuildAppOptions {
   readonly logger?: boolean;
+  readonly installationService?: InstallationService;
 }
 
 function normalizeValidationIssues(
@@ -36,8 +40,19 @@ function normalizeValidationIssues(
 }
 
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
+  const installationService =
+    options.installationService ??
+    new InstallationService(process.env.SCOLA_DATA_DIR?.trim() || './data');
+
   const app = Fastify({
-    logger: options.logger ?? false,
+    logger: options.logger
+      ? {
+          redact: {
+            paths: [...STRUCTURED_LOG_REDACTION_PATHS],
+            censor: '[REDACTED]',
+          },
+        }
+      : false,
     genReqId: () => randomUUID(),
   });
 
@@ -46,10 +61,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       openapi: '3.0.3',
       info: {
         title: 'ScolaOS API',
-        description: 'Self-hosted ScolaOS API contract.',
+        description: 'Self-hosted school operating system API contract.',
         version: '0.0.0',
       },
-      tags: [{ name: 'system' }, { name: 'poc' }],
+      tags: [{ name: 'system' }, { name: 'installer' }, { name: 'poc' }],
     },
   });
 
@@ -83,7 +98,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     const isServerError = statusCode >= 500;
 
     if (isServerError) {
-      request.log.error({ err: error, requestId: request.id }, 'Unhandled API error');
+      request.log.error(
+        { error: safeErrorForLog(error), requestId: request.id },
+        'Unhandled API error',
+      );
     }
 
     return reply
@@ -100,6 +118,21 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   app.setNotFoundHandler((request, reply) =>
     reply.code(404).send(createErrorEnvelope(request.id, 'NOT_FOUND', 'Route not found.')),
   );
+
+  app.addHook('onRequest', async (request) => {
+    if (isInstallerSafePath(request.url)) {
+      return;
+    }
+
+    const status = await installationService.getStatus();
+    if (status.bootState !== 'installed') {
+      throw new ScolaApiError(
+        'INSTALLATION_REQUIRED',
+        'This server must be installed before application routes are available.',
+        503,
+      );
+    }
+  });
 
   app.get(
     '/health',
@@ -118,6 +151,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     }),
   );
 
+  await registerInstallerRoutes(app, installationService);
+
   app.post<{ Body: EchoBody }>(
     '/api/v1/poc/echo',
     {
@@ -128,6 +163,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         response: {
           200: echoResponseSchema,
           400: errorEnvelopeSchema,
+          503: errorEnvelopeSchema,
         },
       },
     },
@@ -147,6 +183,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         response: {
           200: protectedResponseSchema,
           401: errorEnvelopeSchema,
+          503: errorEnvelopeSchema,
         },
       },
     },

@@ -20,6 +20,10 @@ The project is currently pre-alpha and follows milestone-driven development.
 - Added `docs/design-system/accessibility.md` and completed M0-060 with the WCAG 2.2 AA-oriented component accessibility quality gate.
 - Added `docs/design-system/component-specs.md` as the implementation contract for M0-052..059 shared UI primitives.
 - Added `docs/design-system/README.md` as the design-system documentation workspace and M0-061 implementation/demo roadmap.
+- Added the early M1 installer backend/security module with explicit boot states, atomic private config persistence, generated secrets, secret redaction, installer locking, CSRF/origin verification and permanent post-install mutation lockout.
+- Added installer status/session/config endpoints plus fail-closed pre-install application-route gating.
+- Added installer core/unit and Fastify injection regression suites covering state integrity, lock concurrency, CSRF, secret disclosure and installed-state boundaries.
+- Added `docs/pocs/installer-foundation.md` with acceptance evidence and explicit validation limits.
 
 ### Changed
 
@@ -31,11 +35,15 @@ The project is currently pre-alpha and follows milestone-driven development.
 - Advanced the M0 execution board to approximately 57% task-state completion after finishing the design-system visual/responsive/accessibility definition tranche.
 - Prepared detailed implementation specifications for M0-052..059 without falsely marking unbuilt UI components complete.
 - Marked M0-061 IN PROGRESS: documentation architecture exists, but an executable interactive component catalog is still required.
+- Extended server runtime configuration with `SCOLA_DATA_DIR` for installer/config state while retaining the safe localhost bind default.
+- Changed unexpected API/startup logging to sanitized structured error data instead of raw error objects.
+- Updated existing Fastify POC tests to run through an explicitly installed test state rather than bypassing the new boot boundary.
+- Marked M1-001, M1-003, M1-004, M1-005, M1-030, M1-036, M1-037 and M1-085 DONE with appropriate existing/local evidence; kept M1-002 and M1-038 in REVIEW pending actual Fastify/Vitest execution.
 
 ### Repository
 
 - Bootstrap workflow remains direct-to-`main` only: no feature branches, pull requests, or automated dependency-update PRs.
 - GitHub Actions must not be re-enabled automatically while the current quota constraint is in effect.
-- Database/ORM dependencies must not be added by hand-editing `pnpm-lock.yaml`; lockfile changes require normal package resolution in a registry-capable environment.
+- Database/ORM or UI dependencies must not be added by hand-editing `pnpm-lock.yaml`; lockfile changes require normal package resolution in a registry-capable environment.
 - Do not create final domains, package namespaces, app-store assets, signing identities, launch assets or permanent wordmark branding under the ScolaOS name while the replacement-name gate remains open.
-- The design-definition tranche changes documentation/architecture only: no runtime source, dependency manifest, lockfile or workflow definition is modified.
+- The installer tranche adds no new dependency, workflow, branch, PR or Actions trigger.

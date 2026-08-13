@@ -1,9 +1,11 @@
 const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_PORT = 3000;
+const DEFAULT_DATA_DIRECTORY = './data';
 
 export interface ServerConfig {
   readonly host: string;
   readonly port: number;
+  readonly dataDirectory: string;
 }
 
 function parsePort(value: string | undefined): number {
@@ -25,9 +27,11 @@ function parsePort(value: string | undefined): number {
 
 export function loadServerConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const host = env.HOST?.trim() || DEFAULT_HOST;
+  const dataDirectory = env.SCOLA_DATA_DIR?.trim() || DEFAULT_DATA_DIRECTORY;
 
   return {
     host,
     port: parsePort(env.PORT),
+    dataDirectory,
   };
 }

@@ -1,15 +1,37 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import type { FastifyInstance } from 'fastify';
 import { describe, expect, it } from 'vitest';
 
 import { buildApp } from './app.js';
+import { InstallationService } from './installation/service.js';
+
+const validConfig = {
+  baseUrl: 'http://localhost:3000',
+  database: {
+    host: '127.0.0.1',
+    port: 5432,
+    database: 'school',
+    user: 'school_admin',
+    password: 'test-only-secret',
+    sslMode: 'prefer' as const,
+  },
+};
 
 async function withApp(run: (app: FastifyInstance) => Promise<void>): Promise<void> {
-  const app = await buildApp();
+  const root = await mkdtemp(join(tmpdir(), 'scola-poc-installed-'));
+  const installationService = new InstallationService(root);
+  await installationService.writeInitialConfig(validConfig);
+  await installationService.markInstalledAfterVerification();
+  const app = await buildApp({ installationService });
 
   try {
     await run(app);
   } finally {
     await app.close();
+    await rm(root, { recursive: true, force: true });
   }
 }
 
@@ -76,7 +98,7 @@ describe('ScolaOS Fastify POC', () => {
     });
   });
 
-  it('generates an OpenAPI document from route schemas', async () => {
+  it('generates an OpenAPI document from route schemas after installation', async () => {
     await withApp(async (app) => {
       const response = await app.inject({ method: 'GET', url: '/openapi.json' });
       const document = response.json<{
@@ -87,6 +109,7 @@ describe('ScolaOS Fastify POC', () => {
       expect(response.statusCode).toBe(200);
       expect(document.openapi).toBe('3.0.3');
       expect(document.paths['/health']).toBeDefined();
+      expect(document.paths['/start/installation/status']).toBeDefined();
       expect(document.paths['/api/v1/poc/echo']).toBeDefined();
       expect(document.paths['/api/v1/poc/protected']).toBeDefined();
     });

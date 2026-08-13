@@ -1,4 +1,4 @@
-# Tasklist Amendments — M0
+# Tasklist Amendments — M0/M1
 
 This file records task-state changes discovered after the original master backlog. `docs/project-tracker.md` is authoritative for current status. Stable task IDs are preserved and should be folded into `docs/tasklist.md` during later backlog normalization.
 
@@ -57,16 +57,13 @@ This file records task-state changes discovered after the original master backlo
 Completed definition/gate tasks:
 
 - [x] **M0-050 [P0]** Define visual direction: typography, spacing, color semantics, radius, elevation, density.  
-  **Evidence:** `docs/design-system/visual-foundation.md`.  
-  **Locks:** semantic token architecture, neutral/institutional visual character, typography/spacing/density/radii/elevation/icon/focus/motion rules, data/form hierarchy, light-first theming and rename-safe branding separation.
+  **Evidence:** `docs/design-system/visual-foundation.md`.
 
 - [x] **M0-051 [P0]** Define responsive layout principles and breakpoint strategy.  
-  **Evidence:** `docs/design-system/responsive-layout.md`.  
-  **Locks:** layout bands/gutters, desktop/tablet/mobile shell behavior, action prioritization, forms/overlays, table narrow-screen strategies, filters/search, touch/pointer/keyboard, text zoom/localization and feature responsive checklist.
+  **Evidence:** `docs/design-system/responsive-layout.md`.
 
 - [x] **M0-060 [P0]** Establish component accessibility tests/checklist.  
-  **Evidence:** `docs/design-system/accessibility.md`.  
-  **Locks:** WCAG 2.2 AA-oriented semantics, keyboard/focus, contrast, touch, zoom/reflow, forms, overlays, tables/widgets, calendar/timetable, charts, reduced motion, screen-reader/manual + automated test matrix.
+  **Evidence:** `docs/design-system/accessibility.md`.
 
 Implementation specifications prepared but tasks remain open:
 
@@ -81,6 +78,48 @@ Implementation specifications prepared but tasks remain open:
 - [ ] **M0-061 [P1]** Design-system documentation/demo workspace — **IN PROGRESS**.  
   **Prepared:** `docs/design-system/README.md` documentation workspace + component specification catalog.  
   **Still required:** executable interactive demo/catalog rendering the real `packages/ui` components and representative responsive/accessibility states. Static Markdown alone is not completion evidence.
+
+## Early M1 installer backend/security tranche
+
+Core tasks with executable local evidence:
+
+- [x] **M1-001 [P0]** Explicit unconfigured/configured/installed boot states.  
+  **Evidence:** `apps/server/src/installation/types.ts`, `config-store.ts`, `service.ts`, `core.test.ts`, `docs/pocs/installer-foundation.md`.
+
+- [x] **M1-003 [P0]** Server config schema and safe persistence.  
+  **Evidence:** validated config input/stored-config parsing, temp-file + fsync + atomic rename, restrictive directory/file modes, no secret fields in public config.
+
+- [x] **M1-004 [P0]** Generated server security secrets.  
+  **Evidence:** independent 32-byte server-generated session/installer secrets; installer input cannot supply them.
+
+- [x] **M1-005 [P0]** Secret redaction from structured logs/errors.  
+  **Evidence:** recursive key/text redaction, logger redact paths, sanitized unexpected/startup error logging.
+
+- [x] **M1-030 [P0]** Installer lock against concurrent execution.  
+  **Evidence:** exclusive `installer.lock` with ownership token and guarded release; concurrent-acquire runtime proof.
+
+- [x] **M1-036 [P0]** Permanent installer mutation lock after success.  
+  **Evidence:** matching installed marker + `markInstalledAfterVerification()`; config mutation and CSRF-session issuance disabled after installed state.
+
+- [x] **M1-037 [P0]** Installer CSRF/request-origin strategy.  
+  **Evidence:** HttpOnly host cookie, SameSite=Strict, Secure on HTTPS, HMAC header token, `Sec-Fetch-Site` rejection, Origin/Host/protocol match; local runtime verification passed.
+
+Implemented but awaiting real Fastify/Vitest execution before DONE:
+
+- [ ] **M1-002 [P0]** Restrict unconfigured server to installer-safe routes — **REVIEW**.  
+  **Implemented:** global boot gate allows health + `/start/installation...` only until installed; application/OpenAPI routes return `INSTALLATION_REQUIRED`.  
+  **Pending:** execute `apps/server/src/installation/integration.test.ts` with the repository's actual Fastify/Vitest dependencies.
+
+- [ ] **M1-038 [P0]** Installer security integration tests — **REVIEW**.  
+  **Implemented:** pre-install route gating, CSRF/cross-site rejection, secret-free config response, configured-vs-installed behavior, permanent installer lockout.  
+  **Pending:** dependency-capable execution; no GitHub Actions while owner quota is paused.
+
+Related existing foundation:
+
+- [x] **M1-085 [P1]** Request/log correlation IDs.  
+  **Evidence:** Fastify request IDs + `x-request-id` were previously validated in M0-030; unexpected API errors include the request ID and now use sanitized structured error data.
+
+**Evidence note:** the installer core passed a local executable runtime harness and strict TypeScript check. The full changed TypeScript surface was syntax-transpiled. Fastify/Vitest runtime integration remains explicitly REVIEW because the current environment cannot install repository dependencies.
 
 ## Main-only workflow policy
 
