@@ -30,15 +30,7 @@ jobs:
         run: npm install --global pnpm@11.18.0
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Upload generated lockfile
-        uses: actions/upload-artifact@v7
-        with:
-          name: pnpm-lock-generated
-          path: pnpm-lock.yaml
-          retention-days: 3
-          if-no-files-found: error
+        run: pnpm install --frozen-lockfile
 
       - name: Formatting
         run: pnpm format:check
