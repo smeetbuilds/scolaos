@@ -1,12 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const isCI = Boolean(process.env.CI);
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  ...(isCI ? { workers: 1 } : {}),
+  reporter: isCI
     ? [['line'], ['html', { open: 'never', outputFolder: 'playwright-report' }]]
     : 'list',
   outputDir: 'test-results',
