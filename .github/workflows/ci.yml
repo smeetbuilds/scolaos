@@ -1,8 +1,10 @@
 name: CI
 
+# Automatic GitHub Actions execution is intentionally paused while the account
+# Actions quota is constrained. Keep this workflow manual-only until the owner
+# explicitly requests automatic CI again.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read

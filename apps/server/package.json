@@ -3,5 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-only",
-  "type": "module"
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --project tsconfig.build.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/swagger": "9.8.1",
+    "fastify": "5.10.0"
+  }
 }

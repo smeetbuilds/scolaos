@@ -1,10 +1,10 @@
 name: Security
 
+# Automatic and scheduled GitHub Actions execution is intentionally paused while
+# the account Actions quota is constrained. Run manually only when the owner
+# explicitly chooses to spend Actions minutes.
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '23 1 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
