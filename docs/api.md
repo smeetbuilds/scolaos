@@ -75,13 +75,41 @@ GET /health
 
 Current response is the lightweight process probe used even before installation. The richer `M1-083` health engine exists as a service foundation but is not yet exposed through the final admin health API.
 
-### Installer status
+### Installer status and progress
 
 ```text
 GET /start/installation/status
 ```
 
-Returns safe boot/configuration state only. Database passwords and generated server secrets are excluded.
+Returns safe boot/configuration state plus durable installer progress while configured. The current phase model is:
+
+```text
+UNCONFIGURED
+  -> CONFIG_WRITTEN
+  -> DB_CONNECTED
+  -> MIGRATING
+  -> SEEDING
+  -> VERIFYING
+  -> INSTALLED
+```
+
+Running/failed progress may include the active phase, attempt number and a bounded credential-safe failure record. Database passwords and generated server secrets are excluded.
+
+### Installer requirements
+
+```text
+GET /start/installation/requirements
+```
+
+Runs safe bootstrap diagnostics for the Node runtime, cryptographic randomness, writable data/storage/temp directories, disk-space recommendation and HTTPS/base-URL classification. Results distinguish blocking failures from warnings and do not return private filesystem paths.
+
+### Installer recovery
+
+```text
+GET /start/installation/recovery
+```
+
+Returns the safe recovery posture for the current installer phase: whether work is running, retryable, requires manual intervention, or permits correcting configuration before database setup advances. It does not expose credentials or make recovery mutations itself.
 
 ### Installer CSRF session
 
@@ -99,7 +127,17 @@ POST /start/installation/config
 
 Requires the installer cookie + `x-installer-csrf` token and origin/fetch-site checks. Accepts base URL and PostgreSQL connection input, then returns only the safe public projection.
 
-This route does **not** complete installation. Database validation, migrations, seeds, institution/admin creation and post-install verification are still separate pending stages.
+### Correct pending installer configuration
+
+```text
+PUT /start/installation/config
+```
+
+Uses the same CSRF/origin protections. It permits correcting the pending base URL/database configuration only before database setup has advanced beyond the pre-DB checkpoint. The update preserves the installation ID and generated server security secrets and never returns the database password.
+
+These configuration routes do **not** complete installation. Database connection/privilege validation, real migrations, seeds and transactional institution/admin creation remain pending backend stages.
+
+There is intentionally no public endpoint that accepts browser-supplied phase-completion or finalization assertions. Phase transitions and finalization belong to the trusted installer backend/orchestrator. The finalization engine requires seed completion and successful mandatory verification before the installed marker can be created.
 
 ### Schema-validation POC
 

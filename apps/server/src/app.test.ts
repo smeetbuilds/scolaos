@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildApp } from './app.js';
 import { InstallationService } from './installation/service.js';
+import type { PostInstallVerificationProvider } from './installation/verification.js';
 
 const validConfig = {
   baseUrl: 'http://localhost:3000',
@@ -20,11 +21,38 @@ const validConfig = {
   },
 };
 
+const passingVerificationProvider: PostInstallVerificationProvider = {
+  async checkDatabaseConnectivity() {
+    return { ok: true, summary: 'Database is reachable.' };
+  },
+  async checkMigrationsCurrent() {
+    return { ok: true, summary: 'Migrations are current.' };
+  },
+  async checkPermissionSeed() {
+    return { ok: true, summary: 'Permission seed is present.' };
+  },
+  async checkBootstrapData() {
+    return { ok: true, summary: 'Institution and administrator are present.' };
+  },
+};
+
+async function completeInstallation(service: InstallationService): Promise<void> {
+  await service.beginPhase('DB_CONNECTED');
+  await service.completePhase('DB_CONNECTED');
+  await service.beginPhase('MIGRATING');
+  await service.completePhase('MIGRATING');
+  await service.beginPhase('SEEDING');
+  await service.completePhase('SEEDING');
+  await service.finalizeInstallation();
+}
+
 async function withApp(run: (app: FastifyInstance) => Promise<void>): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'scola-poc-installed-'));
-  const installationService = new InstallationService(root);
+  const installationService = new InstallationService(root, {
+    verificationProvider: passingVerificationProvider,
+  });
   await installationService.writeInitialConfig(validConfig);
-  await installationService.markInstalledAfterVerification();
+  await completeInstallation(installationService);
   const app = await buildApp({ installationService });
 
   try {
@@ -110,6 +138,8 @@ describe('ScolaOS Fastify POC', () => {
       expect(document.openapi).toBe('3.0.3');
       expect(document.paths['/health']).toBeDefined();
       expect(document.paths['/start/installation/status']).toBeDefined();
+      expect(document.paths['/start/installation/requirements']).toBeDefined();
+      expect(document.paths['/start/installation/recovery']).toBeDefined();
       expect(document.paths['/api/v1/poc/echo']).toBeDefined();
       expect(document.paths['/api/v1/poc/protected']).toBeDefined();
     });

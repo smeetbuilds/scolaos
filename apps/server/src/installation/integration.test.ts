@@ -7,8 +7,24 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { buildApp } from '../app.js';
 import { InstallationService } from './service.js';
+import type { PostInstallVerificationProvider } from './verification.js';
 
 const roots: string[] = [];
+
+const passingVerificationProvider: PostInstallVerificationProvider = {
+  async checkDatabaseConnectivity() {
+    return { ok: true, summary: 'Database is reachable.' };
+  },
+  async checkMigrationsCurrent() {
+    return { ok: true, summary: 'Migrations are current.' };
+  },
+  async checkPermissionSeed() {
+    return { ok: true, summary: 'Permission seed is present.' };
+  },
+  async checkBootstrapData() {
+    return { ok: true, summary: 'Institution and administrator are present.' };
+  },
+};
 
 async function unconfiguredApp(): Promise<{
   readonly app: FastifyInstance;
@@ -16,8 +32,20 @@ async function unconfiguredApp(): Promise<{
 }> {
   const root = await mkdtemp(join(tmpdir(), 'scola-installer-api-'));
   roots.push(root);
-  const service = new InstallationService(root);
+  const service = new InstallationService(root, {
+    verificationProvider: passingVerificationProvider,
+  });
   return { app: await buildApp({ installationService: service }), service };
+}
+
+async function completeInstallation(service: InstallationService): Promise<void> {
+  await service.beginPhase('DB_CONNECTED');
+  await service.completePhase('DB_CONNECTED');
+  await service.beginPhase('MIGRATING');
+  await service.completePhase('MIGRATING');
+  await service.beginPhase('SEEDING');
+  await service.completePhase('SEEDING');
+  await service.finalizeInstallation();
 }
 
 afterEach(async () => {
@@ -31,9 +59,14 @@ describe('installer security boundary', () => {
       expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200);
       expect(
         (await app.inject({ method: 'GET', url: '/start/installation/status' })).json(),
-      ).toMatchObject({
-        data: { bootState: 'unconfigured', phase: 'UNCONFIGURED' },
+      ).toMatchObject({ data: { bootState: 'unconfigured', phase: 'UNCONFIGURED' } });
+
+      const requirements = await app.inject({
+        method: 'GET',
+        url: '/start/installation/requirements',
       });
+      expect(requirements.statusCode).toBe(200);
+      expect(requirements.json()).toHaveProperty('data.checks');
 
       const blocked = await app.inject({
         method: 'POST',
@@ -50,7 +83,7 @@ describe('installer security boundary', () => {
     }
   });
 
-  it('requires CSRF verification, rejects cross-site mutation, and never returns secrets', async () => {
+  it('requires CSRF verification, supports safe pending config correction, and never returns secrets', async () => {
     const { app } = await unconfiguredApp();
     try {
       const payload = {
@@ -78,17 +111,18 @@ describe('installer security boundary', () => {
       const setCookie = session.headers['set-cookie'];
       expect(typeof setCookie).toBe('string');
       const cookie = String(setCookie).split(';', 1)[0] ?? '';
+      const headers = {
+        host: 'localhost:3000',
+        origin: 'http://localhost:3000',
+        'sec-fetch-site': 'same-origin',
+        cookie,
+        'x-installer-csrf': sessionBody.data.csrfToken,
+      };
 
       const crossSite = await app.inject({
         method: 'POST',
         url: '/start/installation/config',
-        headers: {
-          host: 'localhost:3000',
-          origin: 'https://evil.example',
-          'sec-fetch-site': 'cross-site',
-          cookie,
-          'x-installer-csrf': sessionBody.data.csrfToken,
-        },
+        headers: { ...headers, origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' },
         payload,
       });
       expect(crossSite.statusCode).toBe(403);
@@ -96,25 +130,41 @@ describe('installer security boundary', () => {
       const saved = await app.inject({
         method: 'POST',
         url: '/start/installation/config',
-        headers: {
-          host: 'localhost:3000',
-          origin: 'http://localhost:3000',
-          'sec-fetch-site': 'same-origin',
-          cookie,
-          'x-installer-csrf': sessionBody.data.csrfToken,
-        },
+        headers,
         payload,
       });
       expect(saved.statusCode).toBe(200);
       expect(JSON.stringify(saved.json())).not.toContain('db-secret-value');
       expect(JSON.stringify(saved.json())).not.toContain('sessionSecret');
       expect(JSON.stringify(saved.json())).not.toContain('installerSecret');
+
+      const corrected = await app.inject({
+        method: 'PUT',
+        url: '/start/installation/config',
+        headers,
+        payload: {
+          ...payload,
+          database: { ...payload.database, host: 'db-corrected.internal', password: 'replacement-secret' },
+        },
+      });
+      expect(corrected.statusCode).toBe(200);
+      expect(corrected.json()).toMatchObject({ data: { database: { host: 'db-corrected.internal' } } });
+      expect(JSON.stringify(corrected.json())).not.toContain('replacement-secret');
+
+      const status = await app.inject({ method: 'GET', url: '/start/installation/status' });
+      expect(status.json()).toMatchObject({
+        data: {
+          bootState: 'configured',
+          phase: 'CONFIG_WRITTEN',
+          progress: { state: 'ready', completedPhase: 'CONFIG_WRITTEN' },
+        },
+      });
     } finally {
       await app.close();
     }
   });
 
-  it('keeps application routes blocked while merely configured and permanently disables installer mutations after verification', async () => {
+  it('keeps application routes blocked until verified finalization and then permanently disables installer mutations', async () => {
     const { app, service } = await unconfiguredApp();
     try {
       await service.writeInitialConfig({
@@ -132,7 +182,7 @@ describe('installer security boundary', () => {
       const configured = await app.inject({ method: 'GET', url: '/api/v1/poc/protected' });
       expect(configured.statusCode).toBe(503);
 
-      await service.markInstalledAfterVerification();
+      await completeInstallation(service);
       const installed = await app.inject({
         method: 'GET',
         url: '/api/v1/poc/protected',
@@ -140,10 +190,7 @@ describe('installer security boundary', () => {
       });
       expect(installed.statusCode).toBe(200);
 
-      const session = await app.inject({
-        method: 'GET',
-        url: '/start/installation/session',
-      });
+      const session = await app.inject({ method: 'GET', url: '/start/installation/session' });
       expect(session.statusCode).toBe(409);
       expect(session.json()).toMatchObject({ error: { code: 'INSTALLER_DISABLED' } });
     } finally {

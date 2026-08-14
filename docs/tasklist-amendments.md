@@ -18,10 +18,35 @@
 
 ## M1 installer/security foundation
 
-DONE: M1-001, M1-003, M1-004, M1-005, M1-030, M1-036, M1-037 and M1-085.  
-REVIEW: M1-002 and M1-038 pending actual Fastify/Vitest execution.
+- [x] **M1-001 [P0]** Explicit boot states — DONE.
+- [ ] **M1-002 [P0]** Restrict unconfigured server to installer-safe routes — REVIEW; implementation/tests exist, actual Fastify/Vitest execution still pending.
+- [x] **M1-003 [P0]** Server config schema/safe persistence — DONE.
+- [x] **M1-004 [P0]** Generated server security secrets — DONE.
+- [x] **M1-005 [P0]** Structured secret/error redaction — DONE.
+- [ ] **M1-011 [P0]** Requirements check screen — IN PROGRESS; backend requirement service + API are complete, responsive React screen remains.
+- [ ] **M1-019 [P0]** Real installation-progress UI — IN PROGRESS; durable real backend phase/progress state + API are complete, UI remains.
+- [ ] **M1-021 [P0]** Installation-failure recovery UI — IN PROGRESS; backend failure/retry state, recovery guidance and safe pre-DB config correction are complete, UI remains.
+- [x] **M1-030 [P0]** Exclusive installer lock — DONE.
+- [x] **M1-035 [P0]** Post-install verification engine — DONE.  
+  **Evidence:** `apps/server/src/installation/verification.ts`, `apps/server/src/installation/service.ts`, `apps/server/src/installation/operations.test.ts`, `docs/pocs/installer-operations.md`.  
+  **Boundary:** mandatory database/migration/permission-seed/bootstrap checks are provider-driven and finalization fails closed without a provider. Production provider wiring depends on M1-031..034; this task does not imply those tasks or fresh-install E2E are complete.
+- [x] **M1-036 [P0]** Permanent installer mutation lock after success — DONE.
+- [x] **M1-037 [P0]** Installer CSRF/request-origin strategy — DONE.
+- [ ] **M1-038 [P0]** Installer security integration tests — REVIEW; suite updated for requirements/recovery/config-correction/finalization but actual Fastify/Vitest execution remains blocked.
 
-Evidence: `apps/server/src/installation/`, `docs/pocs/installer-foundation.md`.
+Evidence: `apps/server/src/installation/`, `docs/pocs/installer-foundation.md`, `docs/pocs/installer-operations.md`.
+
+### Installer operations acceptance boundary
+
+- Ordered durable phases are `CONFIG_WRITTEN -> DB_CONNECTED -> MIGRATING -> SEEDING -> VERIFYING -> INSTALLED`.
+- Phase skipping and rewinding fail closed.
+- Stored progress is private/atomic and tied to the active `installationId`.
+- Failure messages must be bounded and credential-safe.
+- Pending DB/base-URL configuration can be corrected only before DB setup advances; installation identity and generated secrets are preserved.
+- Correcting a failed DB setup resets only the pre-DB checkpoint, not migration/seed state.
+- Browser clients cannot directly assert phase completion or finalization.
+- Installed marker creation requires seed completion plus a passing mandatory verification report.
+- PostgreSQL migration/seed/bootstrap implementations remain M1-031..034 and are not substituted by fake providers.
 
 ## M1 authorization foundation
 
@@ -64,41 +89,20 @@ Identity persistence tasks M1-050..052 remain open until the PostgreSQL/Drizzle 
 The following are living documentation/guidance tasks. They are complete for the current pre-alpha architecture and must remain synchronized as implementation evolves; the M6 release gate still revalidates the final documentation set.
 
 - [x] **M6-015 [P0]** Idempotency guidance for job handlers — DONE.  
-  **Evidence:** `docs/contracts/background-jobs.md`, `docs/job-handler-guidelines.md`.  
-  **Boundary:** guidance is complete; PostgreSQL queue/worker implementation remains M6-010..014.
-
+  **Evidence:** `docs/contracts/background-jobs.md`, `docs/job-handler-guidelines.md`.
 - [x] **M6-067 [P0]** Security disclosure documentation — DONE.  
   **Evidence:** `SECURITY.md`, `docs/security-disclosure.md`.
-
-- [x] **M6-090 [P0]** README — DONE as maintained project/readiness entry point.  
-  **Evidence:** `README.md` includes product status, architecture, implementation boundaries, documentation map, development, API, workflow, security and license status.
-
-- [ ] **M6-091 [P0]** LICENSE — OPEN.  
-  **Evidence:** canonical SPDX `AGPL-3.0-only` source blob verified as `0c97efd25b5974b974ed9a8a18207bc4f55bb338`; target repository still contains the abbreviated artifact and must land byte-verbatim canonical text before DONE.
-
-- [x] **M6-092 [P0]** CONTRIBUTING — DONE as maintained contributor policy.  
-  **Evidence:** `CONTRIBUTING.md` plus architecture/dev/API/job/security references.
-
-- [x] **M6-093 [P0]** SECURITY — DONE as maintained root security policy.  
-  **Evidence:** `SECURITY.md`, `docs/security-disclosure.md`, `docs/threat-model.md`.
-
-- [x] **M6-094 [P1]** CODE_OF_CONDUCT — DONE.  
-  **Evidence:** `CODE_OF_CONDUCT.md` with scope, behavior, education-data privacy, reporting and enforcement rules.
-
-- [ ] **M6-095 [P0]** Installation docs — OPEN; do not document a production installer flow before DB migration/seed/post-install verification is implemented and tested.
-- [ ] **M6-096 [P0]** Docker docs — OPEN; Docker is optional and no production container baseline is locked yet.
-- [ ] **M6-097 [P0]** Upgrade/backup/restore docs — OPEN; implementation and N-1/restore evidence must exist before final operational instructions are accepted.
-
-- [x] **M6-098 [P0]** Development environment docs — DONE for the current executable baseline.  
-  **Evidence:** `docs/development-environment.md`; unresolved DB/frontend/native setup is explicitly gated rather than fabricated.
-
-- [x] **M6-099 [P1]** Architecture/module contribution docs — DONE.  
-  **Evidence:** `docs/architecture-contributions.md`, `docs/contracts/module-boundaries.md`.
-
-- [x] **M6-100 [P1]** API docs — DONE for the current pre-alpha surface as a maintained living guide.  
-  **Evidence:** `docs/api.md` plus generated OpenAPI strategy and `docs/contracts/`.
-
-This tranche closes 9 of the 66 numbered M6 tasks before the release gate (~14% task-state progress). This does **not** mean M6 production hardening is 14% complete in effort or risk terms.
+- [x] **M6-090 [P0]** README — DONE as maintained project/readiness entry point.
+- [ ] **M6-091 [P0]** LICENSE — OPEN; target repository still needs byte-verbatim canonical SPDX `AGPL-3.0-only` text.
+- [x] **M6-092 [P0]** CONTRIBUTING — DONE.
+- [x] **M6-093 [P0]** SECURITY — DONE.
+- [x] **M6-094 [P1]** CODE_OF_CONDUCT — DONE.
+- [ ] **M6-095 [P0]** Installation docs — OPEN; final production docs wait for DB-backed installer completion.
+- [ ] **M6-096 [P0]** Docker docs — OPEN.
+- [ ] **M6-097 [P0]** Upgrade/backup/restore docs — OPEN.
+- [x] **M6-098 [P0]** Development environment docs — DONE.
+- [x] **M6-099 [P1]** Architecture/module contribution docs — DONE.
+- [x] **M6-100 [P1]** API docs — DONE for the current maintained pre-alpha surface.
 
 ## Identity/operations acceptance boundary
 

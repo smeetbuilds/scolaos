@@ -105,12 +105,15 @@ describe('installer concurrency and permanent lockout', () => {
     await second.release();
   });
 
-  it('disables further configuration mutations after verified installation', async () => {
+  it('disables further configuration mutations after the installed marker is present', async () => {
     const service = new InstallationService(await temporaryDirectory('scola-service-'));
-    await service.writeInitialConfig(validInput);
-    await service.markInstalledAfterVerification();
+    const config = await service.writeInitialConfig(validInput);
+    await service.store.markInstalled(config.installationId);
 
     await expect(service.writeInitialConfig(validInput)).rejects.toMatchObject({
+      code: 'INSTALLER_DISABLED',
+    });
+    await expect(service.replacePendingConfig(validInput)).rejects.toMatchObject({
       code: 'INSTALLER_DISABLED',
     });
   });
