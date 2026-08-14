@@ -16,6 +16,7 @@ The current repository name is a temporary engineering codename, not an approved
 - [`tasklist.md`](./tasklist.md) — master implementation backlog and release gates.
 - [`tasklist-amendments.md`](./tasklist-amendments.md) — task-state/evidence corrections while the master backlog is normalized.
 - [`project-tracker.md`](./project-tracker.md) — compact live execution board and resume pointer.
+- [`support-matrix.md`](./support-matrix.md) — initial production server/Node/PostgreSQL compatibility promise and validation gates.
 
 ## Contributor and engineering guides
 
@@ -44,17 +45,7 @@ Root contributor-facing policies:
 
 Start with [`contracts/README.md`](./contracts/README.md).
 
-The accepted contract set covers:
-
-- API errors;
-- pagination/filter/sort;
-- API compatibility/version metadata;
-- platform bridges;
-- private storage providers;
-- notification events/channels;
-- background jobs;
-- module boundaries;
-- audit events.
+The accepted contract set covers API errors, pagination/filter/sort, compatibility/version metadata, platform bridges, private storage providers, notification events/channels, background jobs, module boundaries and audit events.
 
 A contract being complete does not imply every adapter/provider/database/native implementation exists.
 
@@ -72,9 +63,11 @@ Start with [`design-system/README.md`](./design-system/README.md).
 - [`pocs/fastify-api.md`](./pocs/fastify-api.md)
 - [`pocs/drizzle-postgres.md`](./pocs/drizzle-postgres.md)
 - [`pocs/installer-foundation.md`](./pocs/installer-foundation.md)
+- [`pocs/installer-operations.md`](./pocs/installer-operations.md)
 - [`pocs/authorization-foundation.md`](./pocs/authorization-foundation.md)
 - [`pocs/identity-auth-foundation.md`](./pocs/identity-auth-foundation.md)
 - [`pocs/operational-security-foundation.md`](./pocs/operational-security-foundation.md)
+- [`pocs/institution-domain.md`](./pocs/institution-domain.md)
 
 POC documents must distinguish executed evidence from planned/static acceptance criteria.
 
@@ -98,7 +91,7 @@ POC documents must distinguish executed evidence from planned/static acceptance 
 | `DONE` | The task's actual acceptance boundary has been satisfied with the appropriate evidence. |
 | `DEFERRED` | Intentionally moved outside the current target. |
 
-`DONE` is task-specific. A documentation/contract task may be DONE when the maintained artifact is complete enough to guide independent implementation; a database/native/runtime task is not DONE until its required executable evidence passes.
+`DONE` is task-specific. A documentation/contract/domain-model task may be DONE when its maintained acceptance boundary is complete enough to guide independent persistence; a database/native/runtime task is not DONE until its required executable evidence passes.
 
 ## Delivery principle
 

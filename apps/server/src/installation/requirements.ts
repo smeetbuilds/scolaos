@@ -2,6 +2,8 @@ import { randomBytes } from 'node:crypto';
 import { mkdir, open, rm, statfs } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { isSupportedNodeVersion, parseNodeMajor, SUPPORTED_NODE_MAJORS } from '../platform-support.js';
+
 export type RequirementState = 'pass' | 'warn' | 'fail';
 
 export interface RequirementCheck {
@@ -31,14 +33,14 @@ export interface InstallerRequirementsOptions {
 const DEFAULT_MINIMUM_FREE_DISK_BYTES = 1024 * 1024 * 1024;
 
 function runtimeCheck(version: string): RequirementCheck {
-  const major = Number.parseInt(version.split('.', 1)[0] ?? '', 10);
-  if (!Number.isInteger(major) || major !== 24) {
+  const major = parseNodeMajor(version);
+  if (!isSupportedNodeVersion(version)) {
     return {
       id: 'runtime-node',
       state: 'fail',
       blocking: true,
-      summary: 'Node.js 24.x is required by this release.',
-      details: { detectedMajor: Number.isFinite(major) ? major : -1 },
+      summary: `Node.js ${SUPPORTED_NODE_MAJORS.join(', ')}.x is required by this release.`,
+      details: { detectedMajor: major ?? -1 },
     };
   }
   return {
@@ -46,7 +48,7 @@ function runtimeCheck(version: string): RequirementCheck {
     state: 'pass',
     blocking: true,
     summary: 'Node.js runtime is supported.',
-    details: { detectedMajor: major },
+    details: { detectedMajor: major ?? -1 },
   };
 }
 
