@@ -1,3 +1,12 @@
+export {
+  installerBootstrapAudit,
+  loginRejectedAudit,
+  loginSucceededAudit,
+  logoutSucceededAudit,
+  passwordResetRequestedAudit,
+  passwordResetResultAudit,
+  type AuthenticationAuditTransport,
+} from './identity-events.js';
 export { AuditService, sanitizeAuditMetadata, type AuditServiceOptions } from './service.js';
 export type {
   AuditActor,

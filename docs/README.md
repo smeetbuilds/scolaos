@@ -56,6 +56,7 @@ Start with [`design-system/README.md`](./design-system/README.md). Visual founda
 - [`pocs/installer-bootstrap.md`](./pocs/installer-bootstrap.md)
 - [`pocs/authorization-foundation.md`](./pocs/authorization-foundation.md)
 - [`pocs/identity-auth-foundation.md`](./pocs/identity-auth-foundation.md)
+- [`pocs/identity-http-security.md`](./pocs/identity-http-security.md)
 - [`pocs/operational-security-foundation.md`](./pocs/operational-security-foundation.md)
 - [`pocs/institution-domain.md`](./pocs/institution-domain.md)
 

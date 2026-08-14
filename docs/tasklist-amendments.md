@@ -33,23 +33,14 @@
 
 ## M1 initial-school bootstrap foundation
 
-- [ ] **M1-014 [P0]** Institution setup screen — IN PROGRESS. Normalized initial-institution input contract now exists; responsive UI/runtime persistence binding remain.
-- [ ] **M1-015 [P0]** Initial academic-session fields — IN PROGRESS. Initial active-session fields/invariants now exist in the bootstrap contract; UI/persistence remain.
+- [ ] **M1-014 [P0]** Institution setup screen — IN PROGRESS. Normalized initial-institution input contract exists; responsive UI/runtime persistence binding remain.
+- [ ] **M1-015 [P0]** Initial academic-session fields — IN PROGRESS. Initial active-session fields/invariants exist in the bootstrap contract; UI/persistence remain.
 - [ ] **M1-016 [P0]** Administrator setup screen — IN PROGRESS. Full-name/email/login/password-confirmation contract and password-hasher port exist; production binding/UI remain.
 - [ ] **M1-032 [P0]** Seed default system data — IN PROGRESS. Versioned deterministic installation seed plan + integrity fingerprint exist; PostgreSQL application/journal evidence remains.
 - [ ] **M1-033 [P0]** Seed default permission catalog — IN PROGRESS. Seed plan consumes the canonical permission catalog/default roles, rejects drift/unknown permissions, and requires Super Administrator to explicitly grant every current permission; PostgreSQL application remains.
-- [ ] **M1-034 [P0]** Create institution/branch/session/admin transactionally — IN PROGRESS. One transaction/idempotency port now covers seed + institution + branch + active session + admin user + membership + super-admin assignment + completion receipt. Real PostgreSQL adapter/constraints/rollback proof remain.
+- [ ] **M1-034 [P0]** Create institution/branch/session/admin transactionally — IN PROGRESS. One transaction/idempotency port covers seed + institution + branch + active session + admin user + membership + super-admin assignment + completion receipt. Real PostgreSQL adapter/constraints/rollback proof remain.
 
 Evidence: `packages/domain/src/bootstrap.ts`, `packages/domain/src/bootstrap.test.ts`, `apps/server/src/installation/seed-plan.ts`, `apps/server/src/installation/seed-plan.test.ts`, `docs/pocs/installer-bootstrap.md`.
-
-Acceptance boundary:
-
-- IDs are trusted/generated, not accepted from browser bootstrap payloads.
-- Raw administrator password/confirmation never enter persistence records/receipt.
-- Production must bind the password-hasher port to the accepted identity hasher.
-- Completed replay returns the durable receipt; transaction code rechecks the receipt for races.
-- Seed descriptor carries system/catalog/role versions plus deterministic SHA-256 content fingerprint.
-- A DB adapter performing independent non-transactional writes does **not** satisfy M1-034.
 
 ## M1 institution/settings foundation
 
@@ -60,21 +51,51 @@ Acceptance boundary:
 - [ ] **M1-074 [P1]** Branding/logo — IN PROGRESS; opaque storage-key metadata boundary exists.
 - [ ] **M1-075 [P0]** Timezone/currency/locale settings — IN PROGRESS; domain validation exists, persistence remains.
 
-## M1 authorization / identity / operations carried forward
+## M1 authorization foundation
 
-- [x] **M1-053/M1-054** auth transport + password hashing.
-- [ ] **M1-055..059** identity HTTP/persistence tasks — IN PROGRESS.
-- [x] **M1-060..063** permission registry/default roles/authorization/scope model.
-- [ ] **M1-064..066** RLS/client nav/attack-suite integration remain open or blocked.
-- [ ] **M1-080 [P0]** Audit persistence — database blocked.
-- [x] **M1-081 [P0]** Audit helper/service.
-- [x] **M1-083 [P0]** Health-check service.
-- [x] **M1-085 [P1]** Request/log correlation IDs.
+- [x] **M1-060 [P0]** Permission registry.
+- [x] **M1-061 [P0]** Default role templates.
+- [x] **M1-062 [P0]** Server authorization service.
+- [x] **M1-063 [P0]** Scope-model POC.
+- [ ] **M1-064..066** RLS/client navigation/attack-suite integration remain open or blocked on persistence/routes.
+
+## M1 identity/authentication foundation
+
+- [x] **M1-053 [P0]** Authentication session transport ADR — DONE.
+- [x] **M1-054 [P0]** Password hashing implementation — DONE.
+- [ ] **M1-055 [P0]** Login endpoint/UI — IN PROGRESS. Framework-neutral HTTP sign-in now enforces HTTPS/proxy trust, browser-vs-native transport, origin policy, safe browser cookie/CSRF issuance and safe login audit events. Persistent repository, concrete Fastify route and UI remain.
+- [ ] **M1-056 [P0]** Logout/session revocation — IN PROGRESS. Session lifecycle plus authenticated HTTP logout, transport matching, browser CSRF/origin protection, audit and cookie clearing exist. Persistence, Fastify route and UX remain.
+- [ ] **M1-057 [P0]** Forgot/reset password — IN PROGRESS. Generic response, secure tokens, trusted reset URL, source/account abuse controls, bounded minimum timing, cheap active-challenge preflight before scrypt and atomic consume contract exist. PostgreSQL challenge store, transactional race proof, delivery/outbox, Fastify/UI remain.
+- [ ] **M1-058 [P0]** Login rate limiting/brute-force controls — IN PROGRESS. Existing normalized-account throttle is now complemented by an HMAC-keyed source spray limiter and reusable atomic counter-store contract. Persistent counter store and Fastify integration remain.
+- [ ] **M1-059 [P0]** Current-user/permission context endpoint — IN PROGRESS. Framework-neutral current-user projection now returns current actor/grants, force-reset state and safe session metadata, with browser CSRF issuance and no token hash. Persisted principal loader and concrete Fastify endpoint remain.
+
+Identity HTTP acceptance details:
+
+- cookie and Authorization credentials are mutually exclusive;
+- duplicate/secure+local session cookies are rejected;
+- forwarded protocol is trusted only when configuration enables proxies **and** the server adapter marks the immediate peer trusted;
+- `sourceAddress` is a server-resolved effective client address, never raw `X-Forwarded-For` input;
+- browser mutations require exact Origin + same-origin Fetch Metadata when present + session-bound CSRF;
+- native bearer mutations do not use ambient-cookie CSRF;
+- forced-reset sessions cannot enter normal application routes;
+- browser JSON responses do not expose session credentials or stored token hashes;
+- password/reset/login audit drafts never include passwords, session/reset tokens, submitted login identifiers or raw source addresses.
+
+Evidence: `apps/server/src/identity/abuse.ts`, `http-boundary.ts`, `http-application.ts`, their tests, hardened `service.ts`/`password-reset.ts`, and `docs/pocs/identity-http-security.md`.
+
+## M1 audit/health foundation
+
+- [ ] **M1-080 [P0]** Audit-event persistence — OPEN / database blocked.
+- [x] **M1-081 [P0]** Audit helper/service — DONE. This tranche adds typed identity/reset/installer event builders that still require the existing sanitizer/store at write time.
+- [ ] **M1-082 [P1]** Admin audit-list UX — OPEN.
+- [x] **M1-083 [P0]** Health-check service — DONE. This tranche adds installation-security, runtime-support and disk-capacity probes.
+- [ ] **M1-084 [P0]** Health admin screen — OPEN. Concrete DB/migration/storage/mail/worker probes and authorized responsive UI remain.
+- [x] **M1-085 [P1]** Request/log correlation IDs — DONE.
 
 ## M6 documentation/open-source readiness
 
 - [x] **M6-015, M6-067, M6-090, M6-092, M6-093, M6-094, M6-098, M6-099, M6-100** — DONE.
-- [ ] **M6-091 [P0]** LICENSE — OPEN unless the current commit contains a target blob exactly matching SPDX `0c97efd25b5974b974ed9a8a18207bc4f55bb338`.
+- [ ] **M6-091 [P0]** LICENSE — OPEN unless a target blob exactly matching SPDX `0c97efd25b5974b974ed9a8a18207bc4f55bb338` is verified.
 - [ ] **M6-095..097** Installation/Docker/upgrade-backup-restore docs — OPEN until runtime behavior is proven.
 
 ## Acceptance boundaries carried forward
@@ -83,8 +104,10 @@ Acceptance boundary:
 - Browser clients cannot assert installer phase completion/finalization.
 - Database/native/browser tasks stay open until their required executable evidence exists.
 - Institution/session/branch/term/bootstrap invariants must also be enforced by PostgreSQL constraints/transactions where appropriate.
-- Raw session/reset/bootstrap password credentials must never become durable lookup/content fields.
-- Required audit writes must fail the protected transaction when persistence fails.
+- Authentication/recovery source counters need an atomic persistent production store before M1-058 can be DONE.
+- Reset `isChallengeActive` is a cheap preflight only; `consumeAndReplacePassword` remains the race-safe authority.
+- Raw session/reset/bootstrap password credentials must never become durable lookup/content/audit fields.
+- Required audit writes must fail the protected transaction when persistence fails; best-effort security telemetry must surface write failures operationally.
 - Health/provider errors must remain credential-safe.
 
 ## Main-only / Actions policy

@@ -8,6 +8,8 @@ import {
   type PasswordResetChallenge,
 } from './password-reset.js';
 
+const FAST_TIMING = { minimumResponseMs: 1, sleep: async () => undefined } as const;
+
 describe('password reset foundation', () => {
   it('returns the same public request response and never persists the raw token', async () => {
     const challenges: PasswordResetChallenge[] = [];
@@ -21,6 +23,7 @@ describe('password reset foundation', () => {
       createChallenge: async (challenge: PasswordResetChallenge) => {
         challenges.push(challenge);
       },
+      isChallengeActive: async () => false,
       consumeAndReplacePassword: async () => null,
     };
     const service = new PasswordResetService(
@@ -30,7 +33,7 @@ describe('password reset foundation', () => {
           deliveredToken = input.token;
         },
       },
-      { now: () => new Date('2026-08-14T10:00:00.000Z') },
+      { now: () => new Date('2026-08-15T00:00:00.000Z'), ...FAST_TIMING },
     );
 
     const known = await service.requestReset(' Admin@School.TEST ');
@@ -53,33 +56,36 @@ describe('password reset foundation', () => {
     );
   });
 
-  it('delegates reset consumption/password replacement/session revocation to one atomic store operation', async () => {
+  it('preflights challenge validity before password hashing and keeps atomic consume authoritative', async () => {
     const token = generatePasswordResetToken();
     const tokenHash = hashPasswordResetToken(token);
     let committedHash = '';
+    let commitCalls = 0;
     const service = new PasswordResetService(
       {
         findAccountByLogin: async () => null,
         invalidateOutstandingForUser: async () => undefined,
         createChallenge: async () => undefined,
+        isChallengeActive: async (candidate) => candidate === tokenHash,
         consumeAndReplacePassword: async (input) => {
+          commitCalls += 1;
           committedHash = input.tokenHash;
           return input.tokenHash === tokenHash ? 'user-1' : null;
         },
       },
       { enqueue: async () => undefined },
-      { now: () => new Date('2026-08-14T10:00:00.000Z') },
+      { now: () => new Date('2026-08-15T00:00:00.000Z'), ...FAST_TIMING },
     );
 
     await expect(
       service.resetPassword(token, 'A sufficiently long replacement password'),
     ).resolves.toBeUndefined();
     expect(committedHash).toBe(tokenHash);
+    expect(commitCalls).toBe(1);
+
     await expect(
-      service.resetPassword(
-        generatePasswordResetToken(),
-        'A sufficiently long replacement password',
-      ),
+      service.resetPassword(generatePasswordResetToken(), 'short'),
     ).rejects.toMatchObject({ code: 'PASSWORD_RESET_INVALID', statusCode: 400 });
+    expect(commitCalls).toBe(1);
   });
 });

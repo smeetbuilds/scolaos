@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ScolaApiError } from '../errors.js';
+import type { AuthenticationAbuseService } from './abuse.js';
 import { verifyPassword } from './password.js';
 import {
   fingerprintSensitiveMetadata,
@@ -43,6 +44,7 @@ export class AuthenticationService {
     private readonly sessions: SessionRepository,
     private readonly throttle: LoginThrottleService,
     private readonly metadataSecret: string,
+    private readonly abuse?: AuthenticationAbuseService,
   ) {
     if (metadataSecret.length < 32) {
       throw new Error('Session metadata secret must contain at least 32 characters.');
@@ -52,6 +54,7 @@ export class AuthenticationService {
   public async signIn(request: LoginRequest, now = new Date()): Promise<LoginResult> {
     const normalizedLogin = normalizeLoginIdentifier(request.login);
     await this.throttle.assertAllowed(normalizedLogin, now);
+    await this.abuse?.assertLoginAllowed(request.metadata?.sourceAddress, now);
 
     const account = await this.identities.findAccountByLogin(normalizedLogin);
     const passwordValid = await verifyPassword(
@@ -61,6 +64,7 @@ export class AuthenticationService {
 
     if (account === null || !passwordValid || !account.enabled) {
       await this.throttle.recordFailure(normalizedLogin, now);
+      await this.abuse?.recordLoginFailure(request.metadata?.sourceAddress, now);
       throw invalidCredentials();
     }
 

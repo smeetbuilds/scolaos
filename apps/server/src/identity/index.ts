@@ -1,4 +1,40 @@
+export {
+  AuthenticationAbuseService,
+  PasswordResetAbuseService,
+  equalizeMinimumResponseTime,
+  securityCounterKey,
+  type AuthenticationAbusePolicy,
+  type MinimumResponseTimingOptions,
+  type PasswordResetAbusePolicy,
+  type PasswordResetRequestAbuseDecision,
+  type SecurityCounterSnapshot,
+  type SecurityCounterStore,
+} from './abuse.js';
 export { issueSessionCsrfToken, verifySessionCsrfToken } from './csrf.js';
+export {
+  IdentityHttpApplication,
+  type AuthorizedHttpRequest,
+  type CurrentUserHttpResult,
+  type IdentityAuditPort,
+  type IdentityAuthenticationPort,
+  type IdentityHttpApplicationOptions,
+  type SignInHttpInput,
+  type SignInHttpResult,
+  type SignOutHttpResult,
+} from './http-application.js';
+export {
+  assertAuthenticatedMutationSafety,
+  assertForcedPasswordResetRouteAllowed,
+  assertPublicBrowserMutationOrigin,
+  assertSessionTransportMatches,
+  extractSessionCredential,
+  resolveRequestSecurity,
+  type AuthenticatedRouteIntent,
+  type ExtractedSessionCredential,
+  type IdentityHttpBoundaryOptions,
+  type IdentityHttpRequestContext,
+  type ResolvedRequestSecurity,
+} from './http-boundary.js';
 export {
   hashPassword,
   MAX_PASSWORD_CODE_POINTS,
@@ -19,6 +55,7 @@ export {
   type PasswordResetChallenge,
   type PasswordResetCommitInput,
   type PasswordResetDelivery,
+  type PasswordResetRequestContext,
   type PasswordResetRequestResult,
   type PasswordResetServiceOptions,
   type PasswordResetStore,

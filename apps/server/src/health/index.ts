@@ -4,6 +4,14 @@ export {
   createProviderHealthProbe,
   createRuntimeHealthProbe,
 } from './probes.js';
+export {
+  createDiskCapacityHealthProbe,
+  createInstallationSecurityHealthProbe,
+  createRuntimeSupportHealthProbe,
+  type DiskCapacityHealthOptions,
+  type InstallationSecuritySnapshot,
+  type RuntimeSupportSnapshot,
+} from './security-probes.js';
 export type {
   HealthProbe,
   HealthProbeObservation,
