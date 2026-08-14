@@ -36,31 +36,41 @@ Related DB/client tasks remain open: M1-033, M1-052, M1-064, M1-065 and M1-066.
 
 ## M1 identity/authentication foundation
 
-- [x] **M1-053 [P0] Authentication session transport ADR — DONE.**  
-  **Evidence:** ADR-025 amendment, `apps/server/src/identity/transport.ts`, `session-token.ts`, `csrf.ts`, `service.ts`, `docs/pocs/identity-auth-foundation.md`.  
-  **Decision:** opaque server-side sessions; browser cookie transport; native bearer transport; explicit revocation/expiry; session-bound browser CSRF primitive.
+- [x] **M1-053 [P0]** Authentication session transport ADR — DONE.
+- [x] **M1-054 [P0]** Password hashing implementation — DONE.
+- [ ] **M1-055 [P0]** Login endpoint/UI — IN PROGRESS; service exists, persistence/HTTP/audit/UI remain.
+- [ ] **M1-056 [P0]** Logout/session revocation — IN PROGRESS; session lifecycle exists, persistence/HTTP/UX remain.
+- [ ] **M1-057 [P0]** Forgot/reset password — IN PROGRESS; service/security contract and tests now exist, but PostgreSQL atomic commit, delivery/outbox, HTTP/UI and integration tests remain.
+- [ ] **M1-058 [P0]** Login rate limiting/brute-force controls — IN PROGRESS; service exists, persistent store/HTTP integration remain.
+- [ ] **M1-059 [P0]** Current-user/permission context endpoint — IN PROGRESS; principal loading exists, persistence/endpoint remain.
 
-- [x] **M1-054 [P0] Password hashing implementation — DONE.**  
-  **Evidence:** `apps/server/src/identity/password.ts`, permanent tests, local executable harness.  
-  **Locks:** versioned asynchronous `scrypt` record, random salt, normalization, constant-time verification and upgrade metadata.
-
-Substantial core implementation exists but tasks remain open:
-
-- [ ] **M1-055 [P0]** Login endpoint/UI — IN PROGRESS. `AuthenticationService.signIn()` exists; PostgreSQL repository, Fastify route, audit integration and UI remain.
-- [ ] **M1-056 [P0]** Logout/session revocation — IN PROGRESS. Core session revocation/expiry exists; persistent repository/endpoints/session UX remain.
-- [ ] **M1-057 [P0]** Forgot/reset password — OPEN.
-- [ ] **M1-058 [P0]** Login rate limiting/brute-force controls — IN PROGRESS. Account throttling service/policy exists; persistent store and HTTP/source integration remain.
-- [ ] **M1-059 [P0]** Current-user/permission context endpoint — IN PROGRESS. Authenticated principal resolves into the existing authorization actor; persistence/endpoint remain.
+Evidence: `apps/server/src/identity/`, `docs/pocs/identity-auth-foundation.md`, `docs/pocs/operational-security-foundation.md`.
 
 Identity persistence tasks M1-050..052 remain open until the PostgreSQL/Drizzle stack is proven.
 
-## Identity acceptance boundary
+## M1 audit/health foundation
+
+- [ ] **M1-080 [P0]** Audit-event persistence — OPEN / database blocked.
+- [x] **M1-081 [P0]** Audit helper/service — DONE.  
+  **Evidence:** `apps/server/src/audit/`, `docs/contracts/audit-events.md`, `docs/pocs/operational-security-foundation.md`.  
+  **Locks:** trusted server ID/time, normalized action/actor/resource semantics, bounded metadata, secret rejection, required-vs-best-effort write behavior and transaction-compatible store injection.
+- [ ] **M1-082 [P1]** Admin audit-list UX — OPEN.
+- [x] **M1-083 [P0]** Health-check service — DONE.  
+  **Evidence:** `apps/server/src/health/`, `docs/pocs/operational-security-foundation.md`.  
+  **Locks:** critical/optional probes, timeouts, safe aggregation, generic provider failures, secret-safe details, runtime/filesystem probes and provider adapters.
+- [ ] **M1-084 [P0]** Health admin screen — OPEN.
+- [x] **M1-085 [P1]** Request/log correlation IDs — DONE previously.
+
+## Identity/operations acceptance boundary
 
 - In-memory stores are test fixtures only, never production persistence.
-- Raw session credentials must not be stored as lookup keys.
-- Current account/permission state must be loaded from authoritative server persistence.
-- Password create/change flows still require compromised/common-password screening before completion.
-- Login/logout/current-user tasks are not DONE until persisted repositories + real protected HTTP integration are tested.
+- Raw session/reset credentials must not be stored as lookup keys.
+- Password-reset consumption/password replacement/reset invalidation/session revocation must be atomic in the real persistence layer.
+- Password-reset request HTTP behavior still needs abuse controls and timing/equalization work.
+- Audit metadata rejects secrets rather than silently retaining redacted durable copies.
+- Required audit writes must fail the protected transaction when persistence fails.
+- Health provider exceptions must not expose internal exception/credential text to the client.
+- Login/logout/current-user/reset tasks are not DONE until persisted repositories + real protected HTTP integration are tested.
 
 ## Main-only / Actions policy
 
@@ -73,4 +83,4 @@ Identity persistence tasks M1-050..052 remain open until the PostgreSQL/Drizzle 
 
 ## Open-source packaging note
 
-`M6-091 LICENSE` remains open for production-release packaging verification until the complete canonical AGPL-3.0-only license text is verified as the final artifact.
+`M6-091 LICENSE` remains open. The canonical SPDX `AGPL-3.0-only` source blob is verified as `0c97efd25b5974b974ed9a8a18207bc4f55bb338`, but the target repository must still replace its abbreviated file with byte-verbatim canonical text and verify the resulting blob before the task is marked DONE.

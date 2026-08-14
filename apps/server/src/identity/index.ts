@@ -10,6 +10,20 @@ export {
   type PasswordPolicyResult,
 } from './password.js';
 export {
+  PasswordResetService,
+  buildPasswordResetUrl,
+  generatePasswordResetToken,
+  hashPasswordResetToken,
+  isPasswordResetToken,
+  type PasswordResetAccount,
+  type PasswordResetChallenge,
+  type PasswordResetCommitInput,
+  type PasswordResetDelivery,
+  type PasswordResetRequestResult,
+  type PasswordResetServiceOptions,
+  type PasswordResetStore,
+} from './password-reset.js';
+export {
   fingerprintSensitiveMetadata,
   generateSessionToken,
   hashSessionToken,
