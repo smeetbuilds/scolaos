@@ -28,11 +28,7 @@ The current repository name is a temporary engineering codename, not an approved
 - [`releasing.md`](./releasing.md) — change/release discipline.
 - [`formatting.md`](./formatting.md) — formatting notes.
 
-Root contributor-facing policies:
-
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
-- [`../SECURITY.md`](../SECURITY.md)
-- [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
+Root contributor-facing policies: [`../CONTRIBUTING.md`](../CONTRIBUTING.md), [`../SECURITY.md`](../SECURITY.md), [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md).
 
 ## Security
 
@@ -43,20 +39,13 @@ Root contributor-facing policies:
 
 ## Platform contracts
 
-Start with [`contracts/README.md`](./contracts/README.md).
-
-The accepted contract set covers API errors, pagination/filter/sort, compatibility/version metadata, platform bridges, private storage providers, notification events/channels, background jobs, module boundaries and audit events.
+Start with [`contracts/README.md`](./contracts/README.md). The accepted set covers API errors, pagination/filter/sort, compatibility/version metadata, platform bridges, private storage providers, notification events/channels, background jobs, module boundaries and audit events.
 
 A contract being complete does not imply every adapter/provider/database/native implementation exists.
 
 ## Design system
 
-Start with [`design-system/README.md`](./design-system/README.md).
-
-- `visual-foundation.md` — semantic visual system.
-- `responsive-layout.md` — desktop/tablet/mobile composition rules.
-- `accessibility.md` — WCAG 2.2 AA-oriented component gate.
-- `component-specs.md` — implementation contracts for the pending shared UI primitives.
+Start with [`design-system/README.md`](./design-system/README.md). Visual foundation, responsive composition, WCAG-oriented accessibility gates and component implementation contracts live there.
 
 ## Proof-of-concept / executable evidence
 
@@ -64,6 +53,7 @@ Start with [`design-system/README.md`](./design-system/README.md).
 - [`pocs/drizzle-postgres.md`](./pocs/drizzle-postgres.md)
 - [`pocs/installer-foundation.md`](./pocs/installer-foundation.md)
 - [`pocs/installer-operations.md`](./pocs/installer-operations.md)
+- [`pocs/installer-bootstrap.md`](./pocs/installer-bootstrap.md)
 - [`pocs/authorization-foundation.md`](./pocs/authorization-foundation.md)
 - [`pocs/identity-auth-foundation.md`](./pocs/identity-auth-foundation.md)
 - [`pocs/operational-security-foundation.md`](./pocs/operational-security-foundation.md)
@@ -88,7 +78,7 @@ POC documents must distinguish executed evidence from planned/static acceptance 
 | `IN PROGRESS` | Material implementation/guidance exists but acceptance is incomplete. |
 | `BLOCKED` | Required dependency/environment/decision prevents valid progress. |
 | `REVIEW` | Implementation exists but required review/executable evidence is still pending. |
-| `DONE` | The task's actual acceptance boundary has been satisfied with the appropriate evidence. |
+| `DONE` | The task's actual acceptance boundary has been satisfied with appropriate evidence. |
 | `DEFERRED` | Intentionally moved outside the current target. |
 
 `DONE` is task-specific. A documentation/contract/domain-model task may be DONE when its maintained acceptance boundary is complete enough to guide independent persistence; a database/native/runtime task is not DONE until its required executable evidence passes.
