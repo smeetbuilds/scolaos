@@ -1,103 +1,123 @@
 # ScolaOS — temporary repository codename
 
-**The open-source operating system for schools.**
+**An open-source, self-hostable operating system for schools.**
 
-> **Naming warning:** a preliminary conflict screen on 13 August 2026 found an unrelated, active school-software product using the exact **ScolaOS** name at `scolaos.com`. The current name is therefore rejected as the final public product brand. The repository slug is retained temporarily to avoid a disruptive engineering rename before a replacement name passes screening. Do not register new domains, publish packages, create app-store assets, or launch public branding under the ScolaOS name.
+> **Naming warning:** an August 2026 conflict screen found an unrelated active school-software product using the exact **ScolaOS** name. The current name is therefore rejected as the final public product brand and retained only as a temporary repository/engineering codename. Do not register final domains, publish permanent package/app-store identities, or create launch branding under this name.
 
-This repository contains an open-source, self-hostable school management platform being built for excellent UX, simple installation, strong performance, and a coherent experience across web, desktop, Android, and iOS.
+## Status
 
-> **Project status: pre-alpha / M0 foundation.** There is no production release yet. The repository is being built milestone-by-milestone against the committed PRD and engineering task tracker.
+**Pre-alpha. No production release exists yet.**
+
+The repository is being built milestone-by-milestone against committed product, architecture, security, UX and quality gates. Current tracker percentages are **task-state progress**, not percentages of a production-ready school ERP.
+
+Already established in code/contracts include:
+
+- Fastify/OpenAPI server proof of concept;
+- fail-closed installer boot/config/security foundation;
+- Role + Permission + Scope authorization foundation;
+- opaque session/password/authentication security foundation;
+- audit-event helper/service foundation;
+- operational health-check service foundation;
+- platform contracts for errors, pagination, compatibility, storage, notifications, jobs, module boundaries and audit;
+- responsive/accessibility/design-system implementation contracts.
+
+Still unresolved or incomplete include the real Drizzle/PostgreSQL proof and persistence layer, the database-backed installer stages, production authentication HTTP/persistence, React/Vite component implementation, Tauri native POCs, and most school business modules.
+
+See [`docs/project-tracker.md`](docs/project-tracker.md) for the authoritative current state.
 
 ## Product principles
 
-- **Self-hosting first:** no mandatory proprietary cloud backend.
-- **Easy installation:** target setup is app + PostgreSQL with a guided `/start/installation` flow.
-- **One product across devices:** shared React/TypeScript client architecture with platform shells where native capabilities are needed.
-- **Role-aware UX:** administrators, teachers, students, parents, finance staff, and operations users get purpose-built workflows rather than one overloaded admin UI.
-- **Security by architecture:** authorization, auditing, installer hardening, private file access, and safe upgrades are core requirements.
-- **Quality over checkbox features:** modules are not complete until responsive UX, validation, authorization, tests, accessibility, performance, and docs are complete.
+- **Self-hosting first:** no mandatory proprietary backend-as-a-service.
+- **Easy installation:** target deployment is the application + PostgreSQL with guided `/start/installation` setup.
+- **One product across devices:** shared React/TypeScript client architecture with platform-specific adapters where native behavior is required.
+- **Role-aware UX:** administrators, teachers, students, parents/guardians, finance staff and operations users get purpose-built workflows.
+- **Security by architecture:** authentication, scoped authorization, auditing, installer hardening, private files, safe upgrades and backups are core product requirements.
+- **Quality over checkbox features:** a workflow is not complete until its integrity, authorization, responsive UX, accessibility, failure states, tests and documentation meet the relevant gates.
 
-## Working architecture
+## Architecture baseline
 
-The current architecture baseline is intentionally evidence-driven:
+Current evidence-driven baseline:
 
 - React + TypeScript shared client
-- Vite web/PWA client *(provisional until M0 POC gate)*
-- Tauri 2 desktop/mobile shells *(provisional until platform POCs pass)*
-- Fastify + TypeScript API *(M0-030 framework POC passed; final architecture lock remains M0-039)*
-- PostgreSQL
-- Drizzle + committed SQL migrations *(provisional; M0-031 executable PostgreSQL proof is still open)*
-- Local filesystem storage by default, optional S3-compatible adapters
-- PostgreSQL-backed jobs initially
-- REST/OpenAPI boundary
-- Guided web installer at `/start/installation`
+- Vite web/PWA tooling *(provisional pending final M0 lock)*
+- Tauri 2 desktop/mobile shells *(provisional pending native POCs)*
+- Fastify + TypeScript API *(framework POC passed; final architecture lock pending)*
+- PostgreSQL mandatory database
+- Drizzle + committed SQL migrations *(provisional; real PostgreSQL proof still open)*
+- local filesystem storage by default with optional S3-compatible adapter
+- PostgreSQL-backed jobs initially, without mandatory Redis/RabbitMQ
+- REST/OpenAPI-compatible API boundary
+- guided installer at `/start/installation`
+- modular monolith server first
 
-Completed architecture-definition modules:
-
-- **Platform contracts M0-070..078:** complete — [`docs/contracts/README.md`](docs/contracts/README.md)
-- **Design definition:** M0-050 visual foundation, M0-051 responsive strategy and M0-060 accessibility gate complete — [`docs/design-system/README.md`](docs/design-system/README.md)
-
-Concrete design-system components M0-052..059 and the interactive M0-061 component catalog are still implementation work.
-
-Material architecture changes are recorded in [`docs/decision.md`](docs/decision.md). Active decision corrections discovered after the baseline log are recorded in [`docs/decision-amendments.md`](docs/decision-amendments.md) until normalization.
+Material decisions live in [`docs/decision.md`](docs/decision.md). Authoritative corrections that have not yet been normalized into that file live in [`docs/decision-amendments.md`](docs/decision-amendments.md).
 
 ## Repository layout
 
 ```text
 apps/
   web/          shared web/PWA client
-  server/       API, installer, business logic, jobs
+  server/       API, installer, application services, jobs
   shell/        Tauri desktop/mobile shell
 packages/
   ui/           shared design system
-  domain/       shared domain contracts
-  api-client/   typed API client
-  config/       shared configuration primitives
-tooling/        repository tooling and test infrastructure
-tests/e2e/      browser E2E suite
-docs/           PRD, architecture, contracts, design system, ADRs, tracker, module PRDs
+  domain/       shared framework-independent domain contracts
+  api-client/   typed client-side API boundary
+  config/       foundational shared configuration
+tooling/        repository tooling and executable POCs
+tests/e2e/      browser/system E2E tests
+docs/           product, architecture, contracts, security and contributor docs
 ```
 
-## Project documentation
+## Documentation map
 
-Start here:
+### Start here
 
-- [Master PRD](docs/prd.md)
-- [Architecture / design](docs/design.md)
+- [Product requirements](docs/prd.md)
+- [Architecture/design](docs/design.md)
 - [Architecture decisions](docs/decision.md)
 - [Decision amendments](docs/decision-amendments.md)
+- [Live execution tracker](docs/project-tracker.md)
+- [Master tasklist](docs/tasklist.md)
+- [Task-state amendments](docs/tasklist-amendments.md)
+
+### Engineering contracts
+
 - [Platform contracts](docs/contracts/README.md)
-- [Design-system workspace](docs/design-system/README.md)
-- [Visual foundation](docs/design-system/visual-foundation.md)
-- [Responsive layout strategy](docs/design-system/responsive-layout.md)
-- [Accessibility quality gate](docs/design-system/accessibility.md)
-- [Component implementation specifications](docs/design-system/component-specs.md)
-- [Brand/name screening](docs/brand-screening.md)
-- [Threat model](docs/threat-model.md)
-- [Master execution tasklist](docs/tasklist.md)
-- [Tasklist amendments](docs/tasklist-amendments.md)
-- [Live project tracker](docs/project-tracker.md)
+- [API guide](docs/api.md)
+- [Architecture/module contribution guide](docs/architecture-contributions.md)
+- [Development environment](docs/development-environment.md)
+- [Background-job handler/idempotency guide](docs/job-handler-guidelines.md)
 - [Dependency policy](docs/dependency-policy.md)
 - [Release/change process](docs/releasing.md)
+
+### Security
+
+- [Security policy](SECURITY.md)
+- [Vulnerability reporting/disclosure](docs/security-disclosure.md)
+- [Threat model](docs/threat-model.md)
+- [Identity/access PRD](docs/prds/002-identity-access.md)
+
+### UX/design system
+
+- [Design-system workspace](docs/design-system/README.md)
+- [Visual foundation](docs/design-system/visual-foundation.md)
+- [Responsive strategy](docs/design-system/responsive-layout.md)
+- [Accessibility gate](docs/design-system/accessibility.md)
+- [Component specifications](docs/design-system/component-specs.md)
+
+### Architecture evidence
+
 - [Fastify API POC](docs/pocs/fastify-api.md)
 - [Drizzle/PostgreSQL POC plan](docs/pocs/drizzle-postgres.md)
-- [Installer & self-hosting PRD](docs/prds/001-installer-self-hosting.md)
-- [Identity & access PRD](docs/prds/002-identity-access.md)
-- [School core PRD](docs/prds/003-school-core.md)
-- [Cross-platform client PRD](docs/prds/004-cross-platform-client.md)
-- [Platform operations PRD](docs/prds/005-platform-operations.md)
-- [Module roadmap](docs/prds/006-module-roadmap.md)
+- [Installer foundation](docs/pocs/installer-foundation.md)
+- [Authorization foundation](docs/pocs/authorization-foundation.md)
+- [Identity/authentication foundation](docs/pocs/identity-auth-foundation.md)
+- [Operational security services](docs/pocs/operational-security-foundation.md)
 
-`docs/project-tracker.md` is the authoritative execution status and contains the exact resume pointer. `docs/tasklist-amendments.md` supersedes stale M0 checkboxes in the original baseline tasklist until backlog normalization is completed.
+## Development quick start
 
-## Development baseline
-
-Current contributor baseline:
-
-- Node.js 24
-- pnpm 11
-- PostgreSQL support will be pinned after the database POC (`M0-031`)
-- TypeScript 6.0.x is deliberately pinned until the selected lint stack supports TypeScript 7
+Current tooling baseline is Node.js 24 and pnpm 11.
 
 ```bash
 git clone https://github.com/smeetbuilds/scolaos.git
@@ -105,6 +125,8 @@ cd scolaos
 pnpm install --frozen-lockfile
 pnpm check
 ```
+
+Read [`docs/development-environment.md`](docs/development-environment.md) before setting up database/native/frontend work. PostgreSQL support versions are intentionally not prescribed until the real database POC passes.
 
 Useful commands:
 
@@ -117,24 +139,36 @@ pnpm test:e2e
 pnpm build
 ```
 
-The generated `pnpm-lock.yaml` is committed. Dependency manifest changes must regenerate the lockfile normally in a registry-capable environment; do not hand-edit dependency resolution.
+Never hand-edit `pnpm-lock.yaml`. Dependency changes must be normally resolved and committed with the regenerated lockfile.
 
-## Repository workflow
+## API
 
-During the bootstrap phase, project changes are committed **directly to `main`**. Do not create feature branches, pull requests, or automated dependency-update PRs. Work is batched into one coherent final commit per implementation tranche.
+The server generates OpenAPI 3.0.3 from Fastify schemas. The current route surface and future route rules are documented in [`docs/api.md`](docs/api.md).
 
-## Continuous quality
+Before verified installation, the server intentionally restricts access to process-health and installer-safe routes. Application APIs are unavailable until installation is complete.
 
-The existing `CI` and `Security` GitHub Actions workflows are retained as **manual-only** quality recipes because automatic Actions execution is currently paused by owner request. They use `workflow_dispatch`, read-only repository permissions, and frozen dependency installs. Do not restore push, pull-request, schedule, bot-commit, or additional workflow triggers unless the owner explicitly requests it.
+## Contributing
 
-When Actions are paused, new executable or database POCs must be validated in another real execution environment before being marked complete. Previous green workflow evidence may only be reused for code that has not changed since that validation.
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [architecture/module contribution guide](docs/architecture-contributions.md) before changing implementation boundaries.
+
+During the current bootstrap phase the owner has requested direct-to-`main` work, no feature branches/PRs, and one coherent final commit per implementation tranche. This is a temporary repository workflow, not a claim that public contributors should bypass review once the project opens a normal contribution flow.
+
+## Quality and GitHub Actions
+
+The existing CI and Security workflows are retained as **manual-only** quality recipes while automatic GitHub Actions usage is paused by owner request. Do not restore push, pull-request, schedule, bot-commit or additional workflow triggers without explicit approval.
+
+When a required executable environment is unavailable, keep the task OPEN/REVIEW and record the limitation. Static inspection must not be reported as a passed database/native/integration test.
+
+## Security
+
+Do not use public issues for exploitable vulnerability details. Follow [`SECURITY.md`](SECURITY.md) and [`docs/security-disclosure.md`](docs/security-disclosure.md).
+
+Never place real student/school data, production secrets, credentials, session/reset tokens, private keys or production backups in source, tests, screenshots, issues or commits.
 
 ## License
 
-The project is declared under **GNU AGPL-3.0-only**. See [`LICENSE`](LICENSE). Production-release packaging still tracks inclusion and verification of the complete canonical license text; do not treat an abbreviated notice as the final release artifact.
+The project is declared **GNU AGPL-3.0-only**. The repository's release-hardening task `M6-091` remains open until the root `LICENSE` is replaced with and byte-verified against the complete canonical AGPL-3.0-only text. Do not interpret the current abbreviated artifact as the final 1.0 packaging state.
 
-## Contributing & security
+## Community
 
-- Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing implementation changes.
-- Security issues must follow [SECURITY.md](SECURITY.md) and must not be disclosed in public issues before coordinated remediation.
-- Community behavior expectations are in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Community behavior expectations are defined in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).

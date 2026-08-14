@@ -1,80 +1,107 @@
-# ScolaOS — Product & Engineering Docs
+# Product & Engineering Documentation
 
-Status: **M0 implementation in progress**  
-Planning baseline: **13 August 2026**
+**Status:** pre-alpha; M0 is the primary milestone with dependency-independent M1 foundations and M6 documentation/readiness work proceeding in parallel.  
+**Authoritative execution state:** [`project-tracker.md`](./project-tracker.md)
 
-This pack is the execution baseline for an open-source, self-hostable School Operating System designed for excellent UX, simple installation, strong performance, and a shared product experience across web, desktop, Android, and iOS.
+The repository is building an open-source, self-hostable school operating system with a guided installation model, strong security/integrity boundaries, and a coherent product experience across web, desktop and mobile targets.
 
-## Documents
+The current repository name is a temporary engineering codename, not an approved final public brand.
 
-- [`prd.md`](./prd.md) — master product requirements and product boundaries.
-- [`design.md`](./design.md) — technical architecture, UX architecture, data/security principles, deployment model, and cross-platform design.
-- [`decision.md`](./decision.md) — architecture decision records (ADRs), including locked, provisional, and open decisions.
-- [`tasklist.md`](./tasklist.md) — detailed implementation backlog with task IDs, dependencies, acceptance criteria, and release gates.
-- [`project-tracker.md`](./project-tracker.md) — live execution tracker and milestone status board.
-- `prds/001-installer-self-hosting.md` — installer, upgrades, deployment, backup, restore, health.
-- `prds/002-identity-access.md` — authentication, RBAC/ABAC, scoping, auditability.
-- `prds/003-school-core.md` — institutions, branches, sessions, students, guardians, academics.
-- `prds/004-cross-platform-client.md` — responsive web, PWA, desktop, Android/iOS shell.
-- `prds/005-platform-operations.md` — jobs, storage, email, notifications, diagnostics, observability.
-- `prds/006-module-roadmap.md` — complete school-management feature map and staged module rollout.
+## Core product and execution
+
+- [`prd.md`](./prd.md) — master product requirements and boundaries.
+- [`design.md`](./design.md) — system/UX architecture and deployment principles.
+- [`decision.md`](./decision.md) — architecture decision log.
+- [`decision-amendments.md`](./decision-amendments.md) — authoritative corrections not yet normalized into the main ADR log.
+- [`tasklist.md`](./tasklist.md) — master implementation backlog and release gates.
+- [`tasklist-amendments.md`](./tasklist-amendments.md) — task-state/evidence corrections while the master backlog is normalized.
+- [`project-tracker.md`](./project-tracker.md) — compact live execution board and resume pointer.
+
+## Contributor and engineering guides
+
+- [`development-environment.md`](./development-environment.md) — current executable contributor environment and explicit unresolved setup gates.
+- [`architecture-contributions.md`](./architecture-contributions.md) — module ownership, boundaries, authorization, API, jobs, storage and ADR contribution rules.
+- [`api.md`](./api.md) — current API surface plus route/version/error/auth/authorization conventions.
+- [`job-handler-guidelines.md`](./job-handler-guidelines.md) — practical at-least-once/idempotency/retry/outbox guidance for durable workers.
+- [`dependency-policy.md`](./dependency-policy.md) — dependency adoption/update rules.
+- [`releasing.md`](./releasing.md) — change/release discipline.
+- [`formatting.md`](./formatting.md) — formatting notes.
+
+Root contributor-facing policies:
+
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
+- [`../SECURITY.md`](../SECURITY.md)
+- [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
+
+## Security
+
+- [`threat-model.md`](./threat-model.md) — initial maintained threat model.
+- [`security-disclosure.md`](./security-disclosure.md) — private vulnerability reporting, testing boundaries and coordinated disclosure policy.
+- [`contracts/audit-events.md`](./contracts/audit-events.md) — durable audit semantics.
+- [`prds/002-identity-access.md`](./prds/002-identity-access.md) — authentication/authorization product requirements.
+
+## Platform contracts
+
+Start with [`contracts/README.md`](./contracts/README.md).
+
+The accepted contract set covers:
+
+- API errors;
+- pagination/filter/sort;
+- API compatibility/version metadata;
+- platform bridges;
+- private storage providers;
+- notification events/channels;
+- background jobs;
+- module boundaries;
+- audit events.
+
+A contract being complete does not imply every adapter/provider/database/native implementation exists.
+
+## Design system
+
+Start with [`design-system/README.md`](./design-system/README.md).
+
+- `visual-foundation.md` — semantic visual system.
+- `responsive-layout.md` — desktop/tablet/mobile composition rules.
+- `accessibility.md` — WCAG 2.2 AA-oriented component gate.
+- `component-specs.md` — implementation contracts for the pending shared UI primitives.
+
+## Proof-of-concept / executable evidence
+
+- [`pocs/fastify-api.md`](./pocs/fastify-api.md)
+- [`pocs/drizzle-postgres.md`](./pocs/drizzle-postgres.md)
+- [`pocs/installer-foundation.md`](./pocs/installer-foundation.md)
+- [`pocs/authorization-foundation.md`](./pocs/authorization-foundation.md)
+- [`pocs/identity-auth-foundation.md`](./pocs/identity-auth-foundation.md)
+- [`pocs/operational-security-foundation.md`](./pocs/operational-security-foundation.md)
+
+POC documents must distinguish executed evidence from planned/static acceptance criteria.
+
+## Module PRDs
+
+- [`prds/001-installer-self-hosting.md`](./prds/001-installer-self-hosting.md)
+- [`prds/002-identity-access.md`](./prds/002-identity-access.md)
+- [`prds/003-school-core.md`](./prds/003-school-core.md)
+- [`prds/004-cross-platform-client.md`](./prds/004-cross-platform-client.md)
+- [`prds/005-platform-operations.md`](./prds/005-platform-operations.md)
+- [`prds/006-module-roadmap.md`](./prds/006-module-roadmap.md)
 
 ## Status vocabulary
 
 | Status | Meaning |
 |---|---|
-| `NOT STARTED` | No implementation work has begun. |
-| `IN PROGRESS` | Actively being implemented in the current milestone. |
-| `BLOCKED` | Cannot progress without a dependency or decision. |
-| `REVIEW` | Implementation complete and awaiting review/testing. |
-| `DONE` | Acceptance criteria and tests have passed. |
-| `DEFERRED` | Intentionally moved to a later milestone. |
+| `NOT STARTED` | No material task implementation has begun. |
+| `IN PROGRESS` | Material implementation/guidance exists but acceptance is incomplete. |
+| `BLOCKED` | Required dependency/environment/decision prevents valid progress. |
+| `REVIEW` | Implementation exists but required review/executable evidence is still pending. |
+| `DONE` | The task's actual acceptance boundary has been satisfied with the appropriate evidence. |
+| `DEFERRED` | Intentionally moved outside the current target. |
 
-## Priority vocabulary
-
-| Priority | Meaning |
-|---|---|
-| `P0` | Release/security blocker. |
-| `P1` | Required for the target milestone. |
-| `P2` | Important but can ship after core workflow. |
-| `P3` | Enhancement / later optimization. |
+`DONE` is task-specific. A documentation/contract task may be DONE when the maintained artifact is complete enough to guide independent implementation; a database/native/runtime task is not DONE until its required executable evidence passes.
 
 ## Delivery principle
 
-A feature is not `DONE` merely because the happy-path screen exists. For this project, `DONE` requires the applicable items below:
+Do not optimize for checked boxes. Apply the relevant gates for business invariants, database integrity/concurrency, authentication/authorization, audit, safe errors, responsive/accessibility behavior, failure states, idempotency, private data, tests and documentation.
 
-1. UX flow implemented for desktop, tablet, and mobile.
-2. Server-side authorization implemented.
-3. Validation and error states implemented.
-4. Database constraints/indexes reviewed.
-5. Audit/event requirements implemented where applicable.
-6. Unit/integration/E2E coverage added at the appropriate layer.
-7. Accessibility keyboard/focus behavior reviewed.
-8. Empty/loading/error states reviewed.
-9. Performance reviewed with realistic dataset size.
-10. Documentation updated.
-
-## Technical baseline
-
-The working baseline is:
-
-- React + TypeScript shared client.
-- Vite-based web client/PWA.
-- Tauri 2 shell for desktop and mobile packaging.
-- Fastify + TypeScript API server.
-- PostgreSQL as the only mandatory infrastructure service.
-- Drizzle ORM + versioned SQL migrations.
-- Local filesystem storage by default; S3-compatible storage optional.
-- PostgreSQL-backed background job queue initially.
-- REST/OpenAPI API boundary.
-- Web installer at `/start/installation`.
-
-These are planning decisions, not unchangeable dogma. Any material change must be recorded in `decision.md` before implementation diverges.
-
-## Primary official references
-
-- Tauri 2: https://v2.tauri.app/
-- Fastify validation/serialization: https://fastify.io/docs/latest/Reference/Validation-and-Serialization/
-- Drizzle migrations: https://orm.drizzle.team/docs/migrations
-- Drizzle PostgreSQL: https://orm.drizzle.team/docs/get-started/postgresql-new
-- PostgreSQL row security: https://www.postgresql.org/docs/current/ddl-rowsecurity.html
+When the required execution environment is unavailable, record the limitation and keep the runtime-dependent task open.

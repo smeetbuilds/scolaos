@@ -3,6 +3,7 @@
 **Project status:** `IN PROGRESS`  
 **Primary milestone:** `M0 — Product & Architecture Foundation`  
 **Parallel foundation:** `M1 — installer, authorization, identity and operations foundations`  
+**Parallel hardening:** `M6 — contributor/documentation readiness where implementation-independent`  
 **Last updated:** 14 August 2026
 
 ## Milestone status
@@ -15,23 +16,24 @@
 | M3 Daily Operations | NOT STARTED | 0% |
 | M4 Fees & Examinations | NOT STARTED | 0% |
 | M5 Cross-Platform & Offline Beta | NOT STARTED | 0% |
-| M6 Production 1.0 Hardening | NOT STARTED | 0% |
+| M6 Production 1.0 Hardening | IN PROGRESS (documentation foundation only) | ~14% task-state |
 
-Percentages are task-state progress, not production-feature percentages.
+Percentages are task-state progress, not production-feature/effort/risk percentages. M6 work is limited to documentation/guidance that can be correct before later implementation; production hardening itself remains largely unstarted.
 
 ## Active / blocked work
 
-- M0-003 replacement name: external screening required.
-- M0-031 Drizzle/PostgreSQL POC: real registry + PostgreSQL execution required.
-- M0-052..059 UI primitives: implementation blocked by unresolved React/Vite dependency environment.
-- M0-061 design catalog: executable real-component catalog still required.
-- M1-002/M1-038 installer integration: REVIEW until real Fastify/Vitest execution.
-- M1-033 permission seed: seed source ready; database persistence pending.
-- M1-055/M1-056/M1-058/M1-059: authentication/session core exists; persistence and HTTP integration pending.
-- M1-057 password reset: service/security contract implemented; PostgreSQL atomic commit, delivery/HTTP/UI and integration tests pending.
-- M1-080 audit persistence: audit service exists; PostgreSQL append-only persistence pending.
-- M1-066 protected-route security suite: requires persisted identity/authorization context.
-- M6-091 canonical LICENSE: authoritative source verified; target replacement remains open until exact bytes are landed/verified in the repository.
+- **M0-003 replacement name:** external screening required; current repository name remains temporary only.
+- **M0-031 Drizzle/PostgreSQL POC:** real registry + PostgreSQL execution required.
+- **M0-052..059 UI primitives:** implementation blocked by unresolved React/Vite dependency environment.
+- **M0-061 design catalog:** executable real-component catalog still required.
+- **M1-002/M1-038 installer integration:** REVIEW until real Fastify/Vitest execution.
+- **M1-033 permission seed:** seed source ready; database persistence pending.
+- **M1-055/M1-056/M1-058/M1-059:** authentication/session core exists; persistence and HTTP integration pending.
+- **M1-057 password reset:** service/security contract implemented; PostgreSQL atomic commit, delivery/HTTP/UI and integration tests pending.
+- **M1-080 audit persistence:** audit service exists; PostgreSQL append-only persistence pending.
+- **M1-066 protected-route security suite:** requires persisted identity/authorization context.
+- **M6-091 canonical LICENSE:** authoritative SPDX source blob is verified, but target repository still needs byte-verbatim full license replacement/verification.
+- **M6-095..097 operational docs:** intentionally open until installer/container/upgrade/backup/restore behavior is implemented and proven.
 
 ## Completed M0 foundation
 
@@ -62,26 +64,38 @@ Evidence: `apps/server/src/identity/`, `docs/pocs/identity-auth-foundation.md`.
 
 ## Completed M1 operational service foundation
 
-- **M1-081 audit helper/service — DONE.** Bounded secret-rejecting audit event construction plus required/best-effort persistence semantics.
+- **M1-081 audit helper/service — DONE.** Bounded secret-rejecting audit construction plus required/best-effort persistence semantics.
 - **M1-083 health-check service — DONE.** Critical/optional provider probes, timeouts, safe aggregation, runtime and filesystem probes.
 
 Evidence: `apps/server/src/audit/`, `apps/server/src/health/`, `docs/pocs/operational-security-foundation.md`.
 
 ## Password-reset progress
 
-M1-057 is IN PROGRESS. The core now has opaque single-use challenge semantics, hashed token persistence, trusted-base reset URL creation, normal password-policy reuse and an atomic persistence contract that includes session revocation. It remains open until the real PostgreSQL/outbox/Fastify/UI flow is proven.
+M1-057 is IN PROGRESS. The core has opaque single-use challenge semantics, hashed token persistence, trusted-base reset URL creation, normal password-policy reuse and an atomic persistence contract that includes session revocation. It remains open until the real PostgreSQL/outbox/Fastify/UI flow is proven.
 
-## Execution evidence
+## Completed M6 contributor/documentation readiness
 
-No GitHub Actions or new dependencies were used for the operational-security tranche.
+Nine implementation-independent M6 tasks are now complete as maintained living documentation:
 
-Local evidence:
+- **M6-015** job-handler idempotency guidance;
+- **M6-067** coordinated security-disclosure documentation;
+- **M6-090** README;
+- **M6-092** CONTRIBUTING;
+- **M6-093** SECURITY;
+- **M6-094** CODE_OF_CONDUCT;
+- **M6-098** development environment docs;
+- **M6-099** architecture/module contribution docs;
+- **M6-100** API docs.
 
-- strict TypeScript compile of the new pure server modules: PASS;
-- executable Node operational-security harness: PASS;
-- permanent Vitest coverage committed for audit, health and password-reset foundations.
+Primary evidence: `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `docs/development-environment.md`, `docs/architecture-contributions.md`, `docs/api.md`, `docs/job-handler-guidelines.md`, `docs/security-disclosure.md`.
 
-Full workspace Fastify/Vitest execution remains pending because repository dependencies are unavailable in the current runtime. Local Node 22 evidence does not close the Node 24 support-matrix gate.
+M6-091 LICENSE remains open. M6-095 installation, M6-096 Docker and M6-097 upgrade/backup/restore docs remain open because writing final operational instructions before the implementation exists would create unsafe/stale guidance.
+
+## Execution/evidence policy
+
+This documentation tranche adds no runtime dependency and does not need GitHub Actions to establish that the files exist and accurately reflect the current repository contracts. Runtime claims inside the docs are grounded in already committed implementation/POC evidence; unresolved runtime behavior is explicitly labeled pending.
+
+For implementation tasks, the existing rule remains: do not substitute static inspection for required database/native/browser/integration execution.
 
 ## Next long-tranche order
 
@@ -93,11 +107,12 @@ Full workspace Fastify/Vitest execution remains pending because repository depen
 6. Finish M1-057 password reset with atomic DB transaction, notification/outbox, HTTP/UI and attack tests.
 7. M1-066 protected-route attack suite, then M1-064 RLS decision.
 8. M1-013 + M1-031..035 database-backed installer completion.
-9. Add concrete DB/migration/storage/mail/worker probes to the completed M1-083 health engine, then M1-084 admin health UI.
+9. Add DB/migration/storage/mail/worker probes to M1-083, then M1-084 admin health UI.
 10. M0-032..038 Tauri POCs and M0-039 architecture lock.
 11. M0-052..059 + M0-061 design-system implementation when dependencies resolve normally.
 12. M6-091 exact canonical LICENSE replacement/verification.
-13. M0 gate review.
+13. M6-095..097 operational docs only as their runtime features become real/tested.
+14. M0 gate review.
 
 ## Decision state
 
@@ -111,4 +126,4 @@ Direct-to-`main` only; no branches/PRs; no new Actions; existing Actions manual-
 
 ## Resume pointer
 
-> Continue in long tranches. M0-031 is still the main architecture blocker. M1-081 and M1-083 are DONE. M1-057 has a tested security/service foundation but requires real persistence and HTTP/UI integration. Next DB-capable tranche should combine M1-050..052, M1-033, M1-080 and the persistence pieces needed to finish auth/reset flows. Do not use GitHub Actions while quota is paused or claim static database evidence as executable proof.
+> Continue in long tranches. M0-031 remains the main architecture blocker. M1 core installer/auth/authorization/audit/health foundations are established; persistence/integration remains open. M6-015/067/090/092/093/094/098/099/100 are complete living docs; M6-091 and operational installation/Docker/upgrade docs remain open. Do not use GitHub Actions while quota is paused or claim static database/native evidence as executable proof.
