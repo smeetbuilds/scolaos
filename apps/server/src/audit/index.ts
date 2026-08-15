@@ -17,6 +17,19 @@ export {
   type PasswordResetRequestedAuditInput,
   type PasswordResetResultAuditInput,
 } from './identity-events.js';
+export {
+  AuditQueryService,
+  auditEventsToCsv,
+  decodeAuditCursor,
+  encodeAuditCursor,
+  normalizeAuditQuery,
+  type AuditCursorPosition,
+  type AuditEventReadStore,
+  type AuditQueryFilters,
+  type AuditQueryInput,
+  type AuditQueryPage,
+  type NormalizedAuditQuery,
+} from './query.js';
 export type {
   AuditActor,
   AuditEvent,

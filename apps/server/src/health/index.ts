@@ -1,5 +1,14 @@
 export { HealthCheckService, type HealthCheckServiceOptions } from './service.js';
 export {
+  HealthAdminService,
+  projectHealthAdminView,
+  projectPublicReadiness,
+  type HealthAdminCheck,
+  type HealthAdminView,
+  type HealthSnapshotProvider,
+  type PublicReadinessView,
+} from './admin.js';
+export {
   createFilesystemWriteHealthProbe,
   createProviderHealthProbe,
   createRuntimeHealthProbe,
