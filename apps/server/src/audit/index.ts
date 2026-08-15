@@ -1,3 +1,8 @@
+export { AuditService, sanitizeAuditMetadata, type AuditServiceOptions } from './service.js';
+export {
+  authorizationDeniedAudit,
+  type AuthorizationDeniedAuditInput,
+} from './authorization-events.js';
 export {
   installerBootstrapAudit,
   loginRejectedAudit,
@@ -5,9 +10,13 @@ export {
   logoutSucceededAudit,
   passwordResetRequestedAudit,
   passwordResetResultAudit,
-  type AuthenticationAuditTransport,
+  type InstallerBootstrapAuditInput,
+  type LoginRejectedAuditInput,
+  type LoginSucceededAuditInput,
+  type LogoutSucceededAuditInput,
+  type PasswordResetRequestedAuditInput,
+  type PasswordResetResultAuditInput,
 } from './identity-events.js';
-export { AuditService, sanitizeAuditMetadata, type AuditServiceOptions } from './service.js';
 export type {
   AuditActor,
   AuditEvent,
