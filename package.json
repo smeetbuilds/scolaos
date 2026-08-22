@@ -21,6 +21,7 @@
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:postgres-poc": "bash tooling/postgres-poc/run.sh",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build"
   },
   "devDependencies": {
