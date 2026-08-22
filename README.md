@@ -50,7 +50,7 @@ Current evidence-driven baseline:
 - guided installer at `/start/installation`
 - modular monolith server first
 
-Material decisions live in [`docs/decision.md`](docs/decision.md). Authoritative corrections that have not yet been normalized into that file live in [`docs/decision-amendments.md`](docs/decision-amendments.md).
+Material decisions live in [`docs/decision.md`](docs/decision.md). [`docs/decision-amendments.md`](docs/decision-amendments.md) is retained as historical evidence for amendments that have now been folded into the canonical decision log.
 
 ## Repository layout
 
@@ -76,7 +76,7 @@ docs/           product, architecture, contracts, security and contributor docs
 - [Product requirements](docs/prd.md)
 - [Architecture/design](docs/design.md)
 - [Architecture decisions](docs/decision.md)
-- [Decision amendments](docs/decision-amendments.md)
+- [Decision amendment history](docs/decision-amendments.md)
 - [Live execution tracker](docs/project-tracker.md)
 - [Master tasklist](docs/tasklist.md)
 - [Task-state amendments](docs/tasklist-amendments.md)
@@ -145,7 +145,7 @@ Never hand-edit `pnpm-lock.yaml`. Dependency changes must be normally resolved a
 
 The server generates OpenAPI 3.0.3 from Fastify schemas. The current route surface and future route rules are documented in [`docs/api.md`](docs/api.md).
 
-Before verified installation, the server intentionally restricts access to process-health and installer-safe routes. Application APIs are unavailable until installation is complete.
+Before verified installation, the server intentionally restricts access to process liveness, safe readiness, and installer-safe routes. Application APIs are unavailable until installation is complete.
 
 ## Contributing
 
@@ -155,7 +155,7 @@ During the current bootstrap phase the owner has requested direct-to-`main` work
 
 ## Quality and GitHub Actions
 
-The existing CI and Security workflows are retained as **manual-only** quality recipes while automatic GitHub Actions usage is paused by owner request. Do not restore push, pull-request, schedule, bot-commit or additional workflow triggers without explicit approval.
+CI runs automatically on pushes to `main` and pull requests, and remains manually dispatchable. It verifies formatting, ESLint, TypeScript, unit tests, build, and the real Fastify Playwright harness across Chromium, Firefox, WebKit and mobile browser emulations. The Security workflow runs on pushes to `main`, pull requests, a weekly schedule and manual dispatch, including `pnpm audit --audit-level=high` against the frozen lockfile.
 
 When a required executable environment is unavailable, keep the task OPEN/REVIEW and record the limitation. Static inspection must not be reported as a passed database/native/integration test.
 

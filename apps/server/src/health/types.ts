@@ -10,7 +10,7 @@ export interface HealthProbe {
   readonly id: string;
   readonly critical: boolean;
   readonly timeoutMs?: number;
-  check(): Promise<HealthProbeObservation>;
+  check(signal: AbortSignal): Promise<HealthProbeObservation>;
 }
 
 export interface HealthProbeResult extends HealthProbeObservation {

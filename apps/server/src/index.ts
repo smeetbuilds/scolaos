@@ -5,7 +5,16 @@ import { InstallationService } from './installation/service.js';
 
 const config = loadServerConfig();
 const installationService = new InstallationService(config.dataDirectory);
-const app = await buildApp({ logger: true, installationService });
+const app = await buildApp({
+  logger: true,
+  installationService,
+  ...(config.trustedProxyCidrs.length === 0
+    ? {}
+    : { trustProxy: [...config.trustedProxyCidrs] }),
+  ...(config.installerBootstrapToken === undefined
+    ? {}
+    : { installerBootstrapToken: config.installerBootstrapToken }),
+});
 let closing = false;
 
 async function shutdown(signal: NodeJS.Signals): Promise<void> {

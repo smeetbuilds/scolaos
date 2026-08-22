@@ -22,11 +22,10 @@ function makeSession(token: string, transport: 'browser-cookie' | 'native-bearer
 function resetService(): PasswordResetService {
   return new PasswordResetService({
     findAccountByLogin: async () => null,
-    invalidateOutstandingForUser: async () => undefined,
-    createChallenge: async () => undefined,
+    issueChallengeAndQueueDelivery: async () => undefined,
     isChallengeActive: async () => false,
     consumeAndReplacePassword: async () => null,
-  }, { enqueue: async () => undefined }, { minimumResponseMs: 1, sleep: async () => undefined });
+  }, { minimumResponseMs: 1, sleep: async () => undefined });
 }
 
 describe('identity HTTP application orchestration', () => {
@@ -71,7 +70,7 @@ describe('identity HTTP application orchestration', () => {
 
   it('returns safe current-user permission context and enforces CSRF on logout', async () => {
     const token = generateSessionToken();
-    const session = makeSession(token, 'browser-cooie');
+    const session = makeSession(token, 'browser-cookie');
     let signedOut = false;
     const principal: AuthenticatedPrincipal = { session, actor: { userId: 'user-1', enabled: true, grants: [] }, forcePasswordReset: false };
     const app = new IdentityHttpApplication({

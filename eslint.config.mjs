@@ -40,7 +40,7 @@ export default tseslint.config(
       reportUnusedDisableDirectives: 'error',
     },
     rules: {
-      curly: ['error', 'all'],
+      curly: ['error', 'multi-line', 'consistent'],
       eqeqeq: ['error', 'always'],
     },
   },

@@ -2,7 +2,7 @@
 
 **Task:** M6-098  
 **Status:** MAINTAINED / current pre-alpha baseline  
-**Last reviewed:** 14 August 2026
+**Last reviewed:** 22 August 2026
 
 This guide describes the development environment that the repository actually supports today. It intentionally does not invent PostgreSQL, Docker, React/Vite, or Tauri setup steps that have not passed their corresponding architecture gates.
 
@@ -65,12 +65,16 @@ The current process configuration is deliberately small:
 | `HOST` | `127.0.0.1` | HTTP bind host |
 | `PORT` | `3000` | HTTP port, 1–65535 |
 | `SCOLA_DATA_DIR` | `./data` | Private installer/config state directory |
+| `SCOLA_TRUST_PROXY` | unset | Comma-separated trusted reverse-proxy addresses/CIDRs; forwarded metadata is ignored when unset |
+| `SCOLA_INSTALLER_BOOTSTRAP_TOKEN` | unset | 32–512 character operator bootstrap credential required to obtain an installer session remotely; loopback-only setup does not require it |
 
-Do not bind an unreviewed development instance to a public interface merely to make it reachable from another device. Installer and authentication surfaces are security-sensitive.
+Do not bind an unreviewed development instance to a public interface merely to make it reachable from another device. Installer and authentication surfaces are security-sensitive. A remotely reachable fresh installation must configure the bootstrap credential, and a TLS-terminating proxy must be explicitly listed in `SCOLA_TRUST_PROXY` rather than enabling blanket forwarding trust.
 
 ## Current boot behavior
 
-A fresh server boots unconfigured. Before verified installation, only process health and `/start/installation...` installer-safe routes are intended to be reachable. Normal application/OpenAPI routes are gated until the installed marker matches the active private configuration.
+A fresh server boots unconfigured. Before verified installation, process liveness, safe readiness, and `/start/installation...` installer-safe routes are intended to be reachable. Normal application/OpenAPI routes are gated until the installed marker matches the active private configuration.
+
+`/health` is process liveness only. `/health/ready` fails closed when a mandatory dependency probe is unavailable or unhealthy. The default database readiness probe remains unavailable until the production PostgreSQL adapter exists, so a pre-alpha server is not incorrectly advertised as production-ready.
 
 The installer backend is still incomplete: database testing, migrations, seeds, transactional institution/admin creation, and post-install verification require the real PostgreSQL/Drizzle tranche.
 
@@ -81,13 +85,14 @@ Never commit:
 - real student, guardian, staff, finance, safeguarding, medical, or school data;
 - production database URLs or passwords;
 - session/reset/API tokens;
+- installer bootstrap or CSRF credentials;
 - private keys;
 - SMTP/provider credentials;
 - production backups or exported documents.
 
 Use synthetic fixtures. Test secrets must be obviously non-production and scoped to tests.
 
-The server already contains structured redaction and secret-rejecting audit/health boundaries, but those controls do not make it acceptable to place secrets in source, fixtures, screenshots, issue descriptions, or commit messages.
+The server contains structured redaction and secret-rejecting audit/health boundaries, including redaction of installer bootstrap/CSRF headers, but those controls do not make it acceptable to place secrets in source, fixtures, screenshots, issue descriptions, or commit messages.
 
 ## Database development
 
@@ -108,9 +113,9 @@ Do not create unresolvable TSX/native code merely to satisfy a task checkbox. Fo
 
 ## GitHub Actions
 
-Existing CI and Security workflows are intentionally manual-only while the repository owner has paused automatic Actions usage. Contributors must not re-enable push, pull-request, schedule, or bot-commit triggers without explicit owner approval.
+CI now runs on pushes to `main`, pull requests, and manual dispatch. The Security workflow runs on pushes to `main`, pull requests, weekly schedule, and manual dispatch. CI covers formatting, lint, typecheck, unit tests, build, and the real Fastify Playwright harness across Chromium, Firefox, WebKit, and mobile browser emulations. The security workflow runs `pnpm audit --audit-level=high` with the frozen lockfile.
 
-When Actions are unavailable, record which checks were executed locally and which could not run. Never describe an unexecuted check as passed.
+If Actions are unavailable because of account/platform limits, record which checks were executed locally and which could not run. Never describe an unexecuted check as passed.
 
 ## Where to read next
 

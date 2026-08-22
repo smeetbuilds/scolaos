@@ -1,6 +1,6 @@
 # Decision Amendments
 
-This file records material decision corrections discovered after the baseline `docs/decision.md` log was committed. These amendments are authoritative where they explicitly supersede an older ADR statement and must be folded back into the main decision log during documentation normalization.
+The amendments below were folded into the canonical `docs/decision.md` log during audit remediation on 22 August 2026. This file is retained only as historical evidence of why ADR-023 and ADR-025 changed; `docs/decision.md` is now authoritative for their current status and wording.
 
 ---
 
@@ -36,7 +36,7 @@ The repository must not create additional permanent branding dependencies on thi
 
 **Effective:** 13 August 2026  
 **Status:** ACCEPTED  
-**Supersedes:** ADR-025 OPEN state in `docs/decision.md`.
+**Supersedes:** ADR-025 OPEN state in the original `docs/decision.md` baseline.
 
 ### Decision
 
@@ -78,9 +78,3 @@ Implementation and executed core evidence are recorded in `apps/server/src/ident
 - Browser login/logout endpoints must set/clear the approved cookie attributes and enforce the CSRF/origin contract.
 - Native clients must never place the bearer credential in ordinary preferences/local storage.
 - A future switch to JWT/self-contained authorization requires a new ADR with explicit revocation, permission-freshness and self-hosting analysis.
-
----
-
-## Amendment normalization rule
-
-When `docs/decision.md` is next normalized, fold ADR-023 and ADR-025 into the main decision log without changing unrelated accepted ADRs.

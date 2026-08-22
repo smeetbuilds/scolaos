@@ -50,6 +50,24 @@ export const healthResponseSchema = {
   },
 } as const;
 
+export const readinessResponseSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['data', 'meta'],
+  properties: {
+    data: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['status', 'observedAt'],
+      properties: {
+        status: { type: 'string', enum: ['ready', 'degraded', 'unavailable'] },
+        observedAt: { type: 'string' },
+      },
+    },
+    meta: requestMetaSchema,
+  },
+} as const;
+
 export const echoBodySchema = {
   type: 'object',
   additionalProperties: false,

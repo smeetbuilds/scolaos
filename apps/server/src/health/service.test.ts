@@ -57,6 +57,35 @@ describe('health-check service', () => {
     });
   });
 
+  it('aborts timed-out provider work instead of only abandoning the response', async () => {
+    let aborted = false;
+    const service = new HealthCheckService(
+      [
+        createProviderHealthProbe('database', true, async (signal) => {
+          await new Promise<void>((resolve) => {
+            signal.addEventListener(
+              'abort',
+              () => {
+                aborted = true;
+                resolve();
+              },
+              { once: true },
+            );
+          });
+          return { state: 'healthy', summary: 'Provider stopped after cancellation.' };
+        }),
+      ],
+      { defaultTimeoutMs: 5 },
+    );
+
+    const snapshot = await service.snapshot();
+    expect(aborted).toBe(true);
+    expect(snapshot.checks[0]).toMatchObject({
+      state: 'unhealthy',
+      summary: 'Health probe timed out.',
+    });
+  });
+
   it('rejects duplicate probe identities', () => {
     expect(() =>
       new HealthCheckService([createRuntimeHealthProbe(), createRuntimeHealthProbe()]),

@@ -49,6 +49,8 @@ export function safeErrorForLog(error: unknown): Record<string, unknown> {
 export const STRUCTURED_LOG_REDACTION_PATHS = [
   'req.headers.authorization',
   'req.headers.cookie',
+  'req.headers["x-installer-bootstrap"]',
+  'req.headers["x-installer-csrf"]',
   'res.headers["set-cookie"]',
   'password',
   '*.password',

@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { chmod, mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
+import { isLoopbackHostname } from '../base-url.js';
 import { ScolaApiError } from '../errors.js';
 import type {
   DatabaseSslMode,
@@ -79,6 +80,14 @@ function normalizeBaseUrl(value: unknown): string {
     throw new ScolaApiError(
       'INSTALLATION_CONFIG_INVALID',
       'baseUrl must not contain credentials, query parameters, or a fragment.',
+      400,
+    );
+  }
+
+  if (parsed.protocol === 'http:' && !isLoopbackHostname(parsed.hostname)) {
+    throw new ScolaApiError(
+      'INSTALLATION_CONFIG_INVALID',
+      'baseUrl must use HTTPS outside localhost development.',
       400,
     );
   }

@@ -58,6 +58,12 @@ export interface SessionPrincipal {
 export interface IdentityRepository {
   findAccountByLogin(normalizedLogin: string): Promise<PasswordAccount | null>;
   loadSessionPrincipal(userId: string): Promise<SessionPrincipal | null>;
+  /** Replace a password hash only when the persisted value still matches expectedPasswordHash. */
+  upgradePasswordHash(
+    userId: string,
+    expectedPasswordHash: string,
+    upgradedPasswordHash: string,
+  ): Promise<boolean>;
 }
 
 export interface SessionRepository {
@@ -76,8 +82,17 @@ export interface LoginThrottleState {
   readonly blockedUntil?: string;
 }
 
+export interface LoginThrottleFailureInput {
+  readonly key: string;
+  readonly occurredAt: string;
+  readonly windowMs: number;
+  readonly failureLimit: number;
+  readonly blockMs: number;
+}
+
 export interface LoginThrottleStore {
   get(key: string): Promise<LoginThrottleState | null>;
-  put(state: LoginThrottleState): Promise<void>;
+  /** Atomically records one failed attempt and returns the resulting state. */
+  recordFailure(input: LoginThrottleFailureInput): Promise<LoginThrottleState>;
   clear(key: string): Promise<void>;
 }

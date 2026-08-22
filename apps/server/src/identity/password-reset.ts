@@ -36,10 +36,24 @@ export interface PasswordResetCommitInput {
   readonly consumedAt: string;
 }
 
+export interface PasswordResetQueuedDelivery {
+  readonly userId: string;
+  readonly destination: string;
+  readonly token: string;
+  readonly expiresAt: string;
+}
+
 export interface PasswordResetStore {
   findAccountByLogin(normalizedLogin: string): Promise<PasswordResetAccount | null>;
-  invalidateOutstandingForUser(userId: string, invalidatedAt: string): Promise<void>;
-  createChallenge(challenge: PasswordResetChallenge): Promise<void>;
+  /**
+   * Must atomically invalidate outstanding challenges for the user, persist the new challenge,
+   * and enqueue a durable protected notification/outbox entry containing the delivery payload.
+   * No SMTP/provider call may occur inside the public request transaction.
+   */
+  issueChallengeAndQueueDelivery(input: {
+    readonly challenge: PasswordResetChallenge;
+    readonly delivery: PasswordResetQueuedDelivery;
+  }): Promise<void>;
   /** Cheap non-consuming preflight used to avoid password-hash CPU work for invalid tokens. */
   isChallengeActive(tokenHash: string, at: string): Promise<boolean>;
   /**
@@ -50,22 +64,12 @@ export interface PasswordResetStore {
   consumeAndReplacePassword(input: PasswordResetCommitInput): Promise<string | null>;
 }
 
-export interface PasswordResetDelivery {
-  enqueue(input: {
-    readonly userId: string;
-    readonly destination: string;
-    readonly token: string;
-    readonly expiresAt: string;
-  }): Promise<void>;
-}
-
 export interface PasswordResetServiceOptions {
   readonly now?: () => Date;
   readonly nowMs?: () => number;
   readonly abuse?: PasswordResetAbuseService;
   readonly minimumResponseMs?: number;
   readonly sleep?: MinimumResponseTimingOptions['sleep'];
-  readonly onDeliveryFailure?: (error: unknown, userId: string) => void;
 }
 
 export interface PasswordResetRequestContext {
@@ -109,11 +113,9 @@ export class PasswordResetService {
   private readonly abuse: PasswordResetAbuseService | undefined;
   private readonly minimumResponseMs: number;
   private readonly sleep: MinimumResponseTimingOptions['sleep'] | undefined;
-  private readonly onDeliveryFailure: (error: unknown, userId: string) => void;
 
   public constructor(
     private readonly store: PasswordResetStore,
-    private readonly delivery: PasswordResetDelivery,
     options: PasswordResetServiceOptions = {},
   ) {
     this.now = options.now ?? (() => new Date());
@@ -121,7 +123,6 @@ export class PasswordResetService {
     this.abuse = options.abuse;
     this.minimumResponseMs = options.minimumResponseMs ?? 350;
     this.sleep = options.sleep;
-    this.onDeliveryFailure = options.onDeliveryFailure ?? (() => undefined);
   }
 
   private async equalize(startedAtMs: number): Promise<void> {
@@ -150,13 +151,21 @@ export class PasswordResetService {
       if (account !== null && account.enabled && abuseDecision.allowDelivery) {
         const createdAt = now.toISOString();
         const expiresAt = new Date(now.getTime() + RESET_TOKEN_TTL_MS).toISOString();
-        await this.store.invalidateOutstandingForUser(account.userId, createdAt);
-        await this.store.createChallenge({ id: randomUUID(), userId: account.userId, tokenHash, createdAt, expiresAt });
-        try {
-          await this.delivery.enqueue({ userId: account.userId, destination: account.deliveryAddress, token, expiresAt });
-        } catch (error) {
-          this.onDeliveryFailure(error, account.userId);
-        }
+        await this.store.issueChallengeAndQueueDelivery({
+          challenge: {
+            id: randomUUID(),
+            userId: account.userId,
+            tokenHash,
+            createdAt,
+            expiresAt,
+          },
+          delivery: {
+            userId: account.userId,
+            destination: account.deliveryAddress,
+            token,
+            expiresAt,
+          },
+        });
       }
 
       return { accepted: true, message: GENERIC_ACCEPTED_MESSAGE };

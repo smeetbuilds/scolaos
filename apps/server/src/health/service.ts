@@ -99,16 +99,17 @@ export class HealthCheckService {
   private async runProbe(probe: HealthProbe): Promise<HealthProbeResult> {
     const started = Date.now();
     const timeoutMs = probe.timeoutMs ?? this.defaultTimeoutMs;
+    const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     try {
       const observation = await Promise.race([
-        probe.check(),
+        probe.check(controller.signal),
         new Promise<HealthProbeObservation>((resolve) => {
-          timer = setTimeout(
-            () => resolve({ state: 'unhealthy', summary: 'Health probe timed out.' }),
-            timeoutMs,
-          );
+          timer = setTimeout(() => {
+            resolve({ state: 'unhealthy', summary: 'Health probe timed out.' });
+            controller.abort();
+          }, timeoutMs);
         }),
       ]);
       const normalized = normalizeObservation(observation);

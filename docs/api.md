@@ -2,7 +2,7 @@
 
 **Task:** M6-100  
 **Status:** MAINTAINED / documents the current pre-alpha API surface and contracts  
-**Last reviewed:** 14 August 2026
+**Last reviewed:** 22 August 2026
 
 The server is an API-first Fastify application. The current route surface is intentionally small because product modules are still being built. This document describes both the routes that exist now and the contracts future routes must follow.
 
@@ -11,6 +11,10 @@ The server is an API-first Fastify application. The current route surface is int
 Application APIs use the `/api/v1/...` namespace. Installer bootstrap endpoints are separately rooted at `/start/installation/...` because they exist before the normal application is installed.
 
 The API compatibility and version-metadata policy is defined in `docs/contracts/api-compatibility.md`.
+
+## Reverse proxies and request origin
+
+Forwarded client/protocol data is trusted only when the operator explicitly configures `SCOLA_TRUST_PROXY` with the reverse-proxy addresses/CIDRs. An unconfigured server does not implicitly trust arbitrary forwarded headers.
 
 ## OpenAPI
 
@@ -67,13 +71,21 @@ Unexpected server errors must not expose stack traces, SQL, connection strings, 
 
 ## Current routes
 
-### Process health
+### Process liveness
 
 ```text
 GET /health
 ```
 
-Current response is the lightweight process probe used even before installation. The richer `M1-083` health engine exists as a service foundation but is not yet exposed through the final admin health API.
+This is the lightweight process liveness probe used even before installation. It intentionally does not claim that PostgreSQL or other production dependencies are ready.
+
+### Dependency readiness
+
+```text
+GET /health/ready
+```
+
+Runs the health service and returns dependency readiness. A critical dependency that is unhealthy or unknown makes readiness unavailable and returns HTTP `503`. Until the production PostgreSQL adapter supplies a real database probe, the default server deliberately fails readiness closed rather than reporting a false-ready state.
 
 ### Installer status and progress
 
@@ -101,7 +113,7 @@ Running/failed progress may include the active phase, attempt number and a bound
 GET /start/installation/requirements
 ```
 
-Runs safe bootstrap diagnostics for the Node runtime, cryptographic randomness, writable data/storage/temp directories, disk-space recommendation and HTTPS/base-URL classification. Results distinguish blocking failures from warnings and do not return private filesystem paths.
+Runs safe bootstrap diagnostics for the Node runtime, cryptographic randomness, writable data/storage/temp directories, disk-space recommendation and HTTPS/base-URL classification. Remote HTTP is a blocking failure; HTTP remains permitted for direct localhost development. Results do not return private filesystem paths.
 
 ### Installer recovery
 
@@ -111,13 +123,21 @@ GET /start/installation/recovery
 
 Returns the safe recovery posture for the current installer phase: whether work is running, retryable, requires manual intervention, or permits correcting configuration before database setup advances. It does not expose credentials or make recovery mutations itself.
 
+A stale installer lock may be reclaimed only after the configured stale-age boundary when its recorded process is no longer alive; active or ambiguous locks continue to fail closed.
+
 ### Installer CSRF session
 
 ```text
 GET /start/installation/session
 ```
 
-Issues the installer CSRF session while installation remains mutable. After successful installation the endpoint is disabled.
+Issues the installer CSRF session while installation remains mutable. Direct loopback installation can request the session normally. Remote first-run installation additionally requires:
+
+```text
+x-installer-bootstrap: <SCOLA_INSTALLER_BOOTSTRAP_TOKEN>
+```
+
+The bootstrap credential is operator-supplied, is treated as secret log data, and is only needed to cross the remote first-run bootstrap boundary. After successful installation the endpoint is disabled.
 
 ### Initial installer configuration
 
@@ -125,7 +145,7 @@ Issues the installer CSRF session while installation remains mutable. After succ
 POST /start/installation/config
 ```
 
-Requires the installer cookie + `x-installer-csrf` token and origin/fetch-site checks. Accepts base URL and PostgreSQL connection input, then returns only the safe public projection.
+Requires the installer cookie + `x-installer-csrf` token and origin/fetch-site checks. Accepts base URL and PostgreSQL connection input, then returns only the safe public projection. Persisted remote base URLs must use HTTPS; loopback HTTP remains available for local development.
 
 ### Correct pending installer configuration
 
@@ -145,7 +165,7 @@ There is intentionally no public endpoint that accepts browser-supplied phase-co
 POST /api/v1/poc/echo
 ```
 
-Exists only as framework/schema proof and is not a product feature.
+Exists only as framework/schema proof and is not part of the default production route surface. It is registered only when `enablePocRoutes: true` is explicitly supplied by a POC/test harness.
 
 ### Authorization-hook POC
 
@@ -153,7 +173,7 @@ Exists only as framework/schema proof and is not a product feature.
 GET /api/v1/poc/protected
 ```
 
-Uses the temporary POC actor header. It is not production authentication and must be removed/replaced when real persisted authentication routes are integrated.
+Uses the temporary POC actor header and is subject to the same explicit `enablePocRoutes: true` gate. It is not production authentication and must be removed/replaced when real persisted authentication routes are integrated.
 
 ## Authentication transport
 

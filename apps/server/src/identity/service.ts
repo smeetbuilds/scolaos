@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { ScolaApiError } from '../errors.js';
 import type { AuthenticationAbuseService } from './abuse.js';
-import { verifyPassword } from './password.js';
+import { hashPassword, passwordRecordNeedsUpgrade, verifyPassword } from './password.js';
 import {
   fingerprintSensitiveMetadata,
   generateSessionToken,
@@ -26,7 +26,7 @@ const NATIVE_IDLE_MS = 7 * 24 * 60 * 60 * 1000;
 const NATIVE_ABSOLUTE_MS = 30 * 24 * 60 * 60 * 1000;
 const TOUCH_AFTER_MS = 5 * 60 * 1000;
 const DUMMY_PASSWORD_RECORD =
-  'scrypt$1$65536$8$1$64$AAECAwQFBgcICQoLDA0ODw$4z6zKh-P-6RvSCFUwWwKLAKgSunnccIxvqgUmOYYCBczkCmf83Y9TSxAZhIMKt6j_9bfXTILKZ9RowPimo2oMA';
+  'scrypt$1$65536$8$2$64$AAECAwQFBgcICQoLDA0ODw$K7t-JnsaY8th0m5RBonP3EQ9Kr350Nl41viphsiuBTkaVKaWACIbzE_6AI7253zdHH2HNUBwnD0iJ61SoI0UYg';
 
 function sessionPolicy(transport: SessionTransport): { idleMs: number; absoluteMs: number } {
   return transport === 'browser-cookie'
@@ -66,6 +66,15 @@ export class AuthenticationService {
       await this.throttle.recordFailure(normalizedLogin, now);
       await this.abuse?.recordLoginFailure(request.metadata?.sourceAddress, now);
       throw invalidCredentials();
+    }
+
+    if (passwordRecordNeedsUpgrade(account.passwordHash)) {
+      const upgradedPasswordHash = await hashPassword(request.password);
+      await this.identities.upgradePasswordHash(
+        account.userId,
+        account.passwordHash,
+        upgradedPasswordHash,
+      );
     }
 
     await this.throttle.recordSuccess(normalizedLogin);

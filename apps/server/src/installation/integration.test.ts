@@ -26,7 +26,7 @@ const passingVerificationProvider: PostInstallVerificationProvider = {
   },
 };
 
-async function unconfiguredApp(): Promise<{
+async function unconfiguredApp(options: { readonly bootstrapToken?: string } = {}): Promise<{
   readonly app: FastifyInstance;
   readonly service: InstallationService;
 }> {
@@ -35,7 +35,16 @@ async function unconfiguredApp(): Promise<{
   const service = new InstallationService(root, {
     verificationProvider: passingVerificationProvider,
   });
-  return { app: await buildApp({ installationService: service }), service };
+  return {
+    app: await buildApp({
+      installationService: service,
+      enablePocRoutes: true,
+      ...(options.bootstrapToken === undefined
+        ? {}
+        : { installerBootstrapToken: options.bootstrapToken }),
+    }),
+    service,
+  };
 }
 
 async function completeInstallation(service: InstallationService): Promise<void> {
@@ -53,10 +62,11 @@ afterEach(async () => {
 });
 
 describe('installer security boundary', () => {
-  it('exposes only health and installer-safe routes before installation', async () => {
+  it('exposes only liveness, readiness, and installer-safe routes before installation', async () => {
     const { app } = await unconfiguredApp();
     try {
       expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200);
+      expect((await app.inject({ method: 'GET', url: '/health/ready' })).statusCode).toBe(503);
       expect(
         (await app.inject({ method: 'GET', url: '/start/installation/status' })).json(),
       ).toMatchObject({ data: { bootState: 'unconfigured', phase: 'UNCONFIGURED' } });
@@ -78,6 +88,35 @@ describe('installer security boundary', () => {
 
       const openapi = await app.inject({ method: 'GET', url: '/openapi.json' });
       expect(openapi.statusCode).toBe(503);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('requires an operator bootstrap credential before remote clients can obtain installer mutation state', async () => {
+    const bootstrapToken = 'remote-installer-bootstrap-token-long-enough';
+    const { app } = await unconfiguredApp({ bootstrapToken });
+    try {
+      const denied = await app.inject({
+        method: 'GET',
+        url: '/start/installation/session',
+        remoteAddress: '203.0.113.10',
+        headers: { host: 'school.example' },
+      });
+      expect(denied.statusCode).toBe(403);
+      expect(denied.json()).toMatchObject({ error: { code: 'INSTALLER_BOOTSTRAP_REQUIRED' } });
+
+      const allowed = await app.inject({
+        method: 'GET',
+        url: '/start/installation/session',
+        remoteAddress: '203.0.113.10',
+        headers: {
+          host: 'school.example',
+          'x-installer-bootstrap': bootstrapToken,
+        },
+      });
+      expect(allowed.statusCode).toBe(200);
+      expect(allowed.headers['set-cookie']).toBeDefined();
     } finally {
       await app.close();
     }
@@ -162,6 +201,23 @@ describe('installer security boundary', () => {
     } finally {
       await app.close();
     }
+  });
+
+  it('rejects a remote HTTP base URL before persisting configuration', async () => {
+    const { service } = await unconfiguredApp();
+    await expect(
+      service.writeInitialConfig({
+        baseUrl: 'http://school.example',
+        database: {
+          host: '127.0.0.1',
+          port: 5432,
+          database: 'school',
+          user: 'school_admin',
+          password: 'db-secret-value',
+          sslMode: 'prefer',
+        },
+      }),
+    ).rejects.toMatchObject({ code: 'INSTALLATION_CONFIG_INVALID', statusCode: 400 });
   });
 
   it('keeps application routes blocked until verified finalization and then permanently disables installer mutations', async () => {

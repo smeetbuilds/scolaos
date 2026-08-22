@@ -6,44 +6,46 @@ import {
   generatePasswordResetToken,
   hashPasswordResetToken,
   type PasswordResetChallenge,
+  type PasswordResetQueuedDelivery,
 } from './password-reset.js';
 
 const FAST_TIMING = { minimumResponseMs: 1, sleep: async () => undefined } as const;
 
 describe('password reset foundation', () => {
-  it('returns the same public request response and never persists the raw token', async () => {
-    const challenges: PasswordResetChallenge[] = [];
-    let deliveredToken = '';
+  it('returns the same public request response and atomically queues delivery without persisting the raw token as the challenge', async () => {
+    const queued: Array<{
+      challenge: PasswordResetChallenge;
+      delivery: PasswordResetQueuedDelivery;
+    }> = [];
     const store = {
       findAccountByLogin: async (login: string) =>
         login === 'admin@school.test'
           ? { userId: 'user-1', normalizedLogin: login, deliveryAddress: login, enabled: true }
           : null,
-      invalidateOutstandingForUser: async () => undefined,
-      createChallenge: async (challenge: PasswordResetChallenge) => {
-        challenges.push(challenge);
+      issueChallengeAndQueueDelivery: async (input: {
+        challenge: PasswordResetChallenge;
+        delivery: PasswordResetQueuedDelivery;
+      }) => {
+        queued.push(input);
       },
       isChallengeActive: async () => false,
       consumeAndReplacePassword: async () => null,
     };
-    const service = new PasswordResetService(
-      store,
-      {
-        enqueue: async (input) => {
-          deliveredToken = input.token;
-        },
-      },
-      { now: () => new Date('2026-08-15T00:00:00.000Z'), ...FAST_TIMING },
-    );
+    const service = new PasswordResetService(store, {
+      now: () => new Date('2026-08-15T00:00:00.000Z'),
+      ...FAST_TIMING,
+    });
 
     const known = await service.requestReset(' Admin@School.TEST ');
     const unknown = await service.requestReset('missing@school.test');
 
     expect(known).toEqual(unknown);
-    expect(challenges).toHaveLength(1);
-    expect(deliveredToken).not.toBe('');
-    expect(challenges[0]?.tokenHash).toBe(hashPasswordResetToken(deliveredToken));
-    expect(challenges[0]?.tokenHash).not.toBe(deliveredToken);
+    expect(queued).toHaveLength(1);
+    const item = queued[0];
+    expect(item).toBeDefined();
+    expect(item?.delivery.token).not.toBe('');
+    expect(item?.challenge.tokenHash).toBe(hashPasswordResetToken(item?.delivery.token ?? ''));
+    expect(item?.challenge.tokenHash).not.toBe(item?.delivery.token);
   });
 
   it('uses a trusted configured base URL rather than request Host data', () => {
@@ -64,8 +66,7 @@ describe('password reset foundation', () => {
     const service = new PasswordResetService(
       {
         findAccountByLogin: async () => null,
-        invalidateOutstandingForUser: async () => undefined,
-        createChallenge: async () => undefined,
+        issueChallengeAndQueueDelivery: async () => undefined,
         isChallengeActive: async (candidate) => candidate === tokenHash,
         consumeAndReplacePassword: async (input) => {
           commitCalls += 1;
@@ -73,7 +74,6 @@ describe('password reset foundation', () => {
           return input.tokenHash === tokenHash ? 'user-1' : null;
         },
       },
-      { enqueue: async () => undefined },
       { now: () => new Date('2026-08-15T00:00:00.000Z'), ...FAST_TIMING },
     );
 

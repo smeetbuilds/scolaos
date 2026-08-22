@@ -1,10 +1,23 @@
 import { expect, test } from '@playwright/test';
 
-test('browser harness renders an accessible ScolaOS document', async ({ page }) => {
-  await page.setContent(
-    '<main><h1>ScolaOS</h1><p>The open-source operating system for schools.</p></main>',
-  );
+test('real ScolaOS server exposes liveness and the fresh-install boundary', async ({ page, request }) => {
+  const health = await page.goto('/health');
+  expect(health?.status()).toBe(200);
+  const healthText = await page.locator('body').innerText();
+  expect(JSON.parse(healthText)).toMatchObject({
+    status: 'ok',
+    service: 'scolaos-server',
+  });
 
-  await expect(page.getByRole('heading', { name: 'ScolaOS' })).toBeVisible();
-  await expect(page.getByText('The open-source operating system for schools.')).toBeVisible();
+  const status = await request.get('/start/installation/status');
+  expect(status.status()).toBe(200);
+  expect(await status.json()).toMatchObject({
+    data: {
+      bootState: 'unconfigured',
+      phase: 'UNCONFIGURED',
+    },
+  });
+
+  const blocked = await request.get('/openapi.json');
+  expect(blocked.status()).toBe(503);
 });

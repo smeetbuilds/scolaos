@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdir, open, rm, statfs } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { classifyServerBaseUrl } from '../base-url.js';
 import { isSupportedNodeVersion, parseNodeMajor, SUPPORTED_NODE_MAJORS } from '../platform-support.js';
 
 export type RequirementState = 'pass' | 'warn' | 'fail';
@@ -132,36 +133,38 @@ function baseUrlCheck(value: string | undefined): RequirementCheck {
       summary: 'Server base URL has not been detected yet.',
     };
   }
-  try {
-    const url = new URL(value);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
-      throw new Error('unsafe url');
-    }
-    const local = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname);
-    if (url.protocol === 'https:') {
-      return {
-        id: 'https-base-url',
-        state: 'pass',
-        blocking: false,
-        summary: 'HTTPS is detected for the server base URL.',
-      };
-    }
+
+  const classification = classifyServerBaseUrl(value);
+  if (classification === 'secure') {
     return {
       id: 'https-base-url',
-      state: 'warn',
+      state: 'pass',
       blocking: false,
-      summary: local
-        ? 'HTTP is acceptable for local installation; use HTTPS before remote access.'
-        : 'HTTPS is not detected. Configure TLS before production use.',
-    };
-  } catch {
-    return {
-      id: 'https-base-url',
-      state: 'warn',
-      blocking: false,
-      summary: 'Server base URL could not be safely classified.',
+      summary: 'HTTPS is detected for the server base URL.',
     };
   }
+  if (classification === 'local-http') {
+    return {
+      id: 'https-base-url',
+      state: 'warn',
+      blocking: false,
+      summary: 'HTTP is acceptable for local installation; use HTTPS before remote access.',
+    };
+  }
+  if (classification === 'insecure-http') {
+    return {
+      id: 'https-base-url',
+      state: 'fail',
+      blocking: true,
+      summary: 'HTTPS is required before remote installation can continue.',
+    };
+  }
+  return {
+    id: 'https-base-url',
+    state: 'warn',
+    blocking: false,
+    summary: 'Server base URL could not be safely classified.',
+  };
 }
 
 export class InstallerRequirementsService {

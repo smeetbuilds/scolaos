@@ -53,7 +53,7 @@ async function withApp(run: (app: FastifyInstance) => Promise<void>): Promise<vo
   });
   await installationService.writeInitialConfig(validConfig);
   await completeInstallation(installationService);
-  const app = await buildApp({ installationService });
+  const app = await buildApp({ installationService, enablePocRoutes: true });
 
   try {
     await run(app);
@@ -64,7 +64,7 @@ async function withApp(run: (app: FastifyInstance) => Promise<void>): Promise<vo
 }
 
 describe('ScolaOS Fastify POC', () => {
-  it('serves a health response with a correlated request ID', async () => {
+  it('serves a liveness response with a correlated request ID', async () => {
     await withApp(async (app) => {
       const response = await app.inject({ method: 'GET', url: '/health' });
       const body = response.json<{
@@ -76,6 +76,14 @@ describe('ScolaOS Fastify POC', () => {
       expect(body.status).toBe('ok');
       expect(response.headers['x-request-id']).toBe(body.meta.requestId);
       expect(body.meta.requestId).toMatch(/^[0-9a-f-]{36}$/i);
+    });
+  });
+
+  it('fails readiness closed while the production database probe is not configured', async () => {
+    await withApp(async (app) => {
+      const response = await app.inject({ method: 'GET', url: '/health/ready' });
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toMatchObject({ data: { status: 'unavailable' } });
     });
   });
 
@@ -110,7 +118,7 @@ describe('ScolaOS Fastify POC', () => {
     });
   });
 
-  it('enforces the authorization hook stub', async () => {
+  it('enforces the authorization hook stub when POC routes are explicitly enabled', async () => {
     await withApp(async (app) => {
       const denied = await app.inject({ method: 'GET', url: '/api/v1/poc/protected' });
       expect(denied.statusCode).toBe(401);
@@ -126,6 +134,22 @@ describe('ScolaOS Fastify POC', () => {
     });
   });
 
+  it('does not expose POC routes in the default application', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'scola-no-poc-'));
+    const installationService = new InstallationService(root, {
+      verificationProvider: passingVerificationProvider,
+    });
+    await installationService.writeInitialConfig(validConfig);
+    await completeInstallation(installationService);
+    const app = await buildApp({ installationService });
+    try {
+      expect((await app.inject({ method: 'GET', url: '/api/v1/poc/protected' })).statusCode).toBe(404);
+    } finally {
+      await app.close();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it('generates an OpenAPI document from route schemas after installation', async () => {
     await withApp(async (app) => {
       const response = await app.inject({ method: 'GET', url: '/openapi.json' });
@@ -137,6 +161,7 @@ describe('ScolaOS Fastify POC', () => {
       expect(response.statusCode).toBe(200);
       expect(document.openapi).toBe('3.0.3');
       expect(document.paths['/health']).toBeDefined();
+      expect(document.paths['/health/ready']).toBeDefined();
       expect(document.paths['/start/installation/status']).toBeDefined();
       expect(document.paths['/start/installation/requirements']).toBeDefined();
       expect(document.paths['/start/installation/recovery']).toBeDefined();

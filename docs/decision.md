@@ -389,15 +389,18 @@ ScolaOS is designed as open-source network/server software. AGPL preserves the a
 
 ## ADR-023 — Project name/brand
 
-**Status:** PROVISIONAL
+**Status:** REJECTED
 
 ### Decision
 
-Use **ScolaOS** as the working product and repository name. The canonical repository is `smeetbuilds/scolaos`.
+`ScolaOS` remains a temporary repository/engineering codename only. It is rejected as the final public product brand after conflict screening found an unrelated active school-software product using the exact ScolaOS name in the same broad market. A replacement name remains OPEN under `M0-003`.
 
-### Remaining gate
+### Consequences
 
-Formal trademark/domain/package-namespace screening remains required before a branded 1.0 public launch. Repository creation alone is not treated as trademark clearance.
+- Do not create new permanent domains, package namespaces, signing identities, app-store listings, launch assets, or permanent design-system branding under ScolaOS.
+- Do not rename the repository automatically; coordinate the migration only after a replacement name passes product/domain/namespace screening and appropriate trademark clearance.
+- Engineering identifiers should remain reasonably renameable until the brand decision closes.
+- This is a product-conflict decision, not a legal finding of trademark infringement.
 
 ## ADR-024 — Package manager/monorepo tooling
 
@@ -419,18 +422,48 @@ Build graph orchestration or CI caching becomes a measured bottleneck. Turborepo
 
 ## ADR-025 — Authentication session transport
 
-**Status:** OPEN
+**Status:** ACCEPTED
 
-Need to decide between secure cookie-based sessions for web plus device tokens for native shells, or another coherent model.
+### Decision
 
-Requirements:
+Use **opaque server-side sessions** for first-party authentication rather than self-contained JWT authorization claims.
 
-- secure revocation;
-- multiple devices;
-- native secure storage;
-- CSRF model;
-- auditability;
-- self-hosted reverse-proxy compatibility.
+Transport by client class:
+
+- **Web/browser:** opaque session credential in an HttpOnly cookie. Production HTTPS uses a `__Host-` cookie with `Secure`, `Path=/`, no Domain and `SameSite=Lax`. Insecure cookies require explicit local-development opt-in only.
+- **Desktop/mobile:** the same opaque credential class is carried as `Authorization: Bearer ...` and must be stored only through the approved native secure-storage platform bridge.
+
+Server persistence stores only a cryptographic hash of each session credential. The raw credential is returned only when the session is issued.
+
+### Session model
+
+- Multiple concurrent device sessions are supported.
+- Sessions have idle and absolute expiry.
+- Individual sessions and all/other sessions can be revoked.
+- Disabled users, revoked sessions, expired sessions and missing principals fail closed.
+- Current authorization grants and relationship context are resolved from authoritative server-side state during authentication rather than copied into long-lived client-controlled claims.
+
+### CSRF model
+
+Browser credentials are cookies, so unsafe browser mutations require a CSRF defense. The core provides a token HMAC-bound to the server session. HTTP integration must combine this with origin/fetch-site validation and must never treat SameSite alone as the complete CSRF control.
+
+Native bearer credentials are not ambient browser cookies and therefore do not use the browser-cookie CSRF mechanism.
+
+### Why
+
+This model directly supports self-hosted operation, predictable revocation, multiple devices, permission/account changes taking effect without waiting for JWT expiry, native secure storage, and straightforward audit/session management.
+
+### Evidence
+
+Implementation and executed core evidence are recorded in `apps/server/src/identity/` and `docs/pocs/identity-auth-foundation.md`.
+
+### Consequences
+
+- `M1-053` is DONE.
+- Session persistence is a server-side database concern and must be designed with M1 identity schemas.
+- Browser login/logout endpoints must set/clear the approved cookie attributes and enforce the CSRF/origin contract.
+- Native clients must never place the bearer credential in ordinary preferences/local storage.
+- A future switch to JWT/self-contained authorization requires a new ADR with explicit revocation, permission-freshness and self-hosting analysis.
 
 ---
 

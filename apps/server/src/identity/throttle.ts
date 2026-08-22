@@ -44,22 +44,12 @@ export class LoginThrottleService {
   }
 
   public async recordFailure(login: string, now = new Date()): Promise<void> {
-    const key = loginThrottleKey(login, this.keySecret);
-    const existing = await this.store.get(key);
-    const nowIso = now.toISOString();
-    const insideWindow =
-      existing !== null && now.getTime() - nowMs(existing.firstFailedAt) <= WINDOW_MS;
-    const failures = insideWindow ? existing.failures + 1 : 1;
-    const firstFailedAt = insideWindow ? existing.firstFailedAt : nowIso;
-    const blockedUntil =
-      failures >= FAILURE_LIMIT ? new Date(now.getTime() + BLOCK_MS).toISOString() : undefined;
-
-    await this.store.put({
-      key,
-      failures,
-      firstFailedAt,
-      lastFailedAt: nowIso,
-      ...(blockedUntil === undefined ? {} : { blockedUntil }),
+    await this.store.recordFailure({
+      key: loginThrottleKey(login, this.keySecret),
+      occurredAt: now.toISOString(),
+      windowMs: WINDOW_MS,
+      failureLimit: FAILURE_LIMIT,
+      blockMs: BLOCK_MS,
     });
   }
 

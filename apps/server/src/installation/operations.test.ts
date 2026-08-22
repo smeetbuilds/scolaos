@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -81,7 +81,7 @@ describe('installer requirements diagnostics', () => {
     expect(JSON.stringify(snapshot)).not.toContain(root);
   });
 
-  it('blocks an unsupported Node major but treats missing HTTPS as a warning', async () => {
+  it('blocks an unsupported Node major and a remote HTTP deployment URL', async () => {
     const snapshot = await new InstallerRequirementsService({
       dataDirectory: await temporaryDirectory('scola-requirements-blocked-'),
       nodeVersion: '22.16.0',
@@ -94,6 +94,19 @@ describe('installer requirements diagnostics', () => {
       state: 'fail',
       blocking: true,
     });
+    expect(snapshot.checks.find((check) => check.id === 'https-base-url')).toMatchObject({
+      state: 'fail',
+      blocking: true,
+    });
+  });
+
+  it('keeps localhost HTTP available for explicit local development only', async () => {
+    const snapshot = await new InstallerRequirementsService({
+      dataDirectory: await temporaryDirectory('scola-requirements-local-'),
+      nodeVersion: '24.7.0',
+      detectedBaseUrl: 'http://localhost:3000',
+      minimumFreeDiskBytes: 1,
+    }).check();
     expect(snapshot.checks.find((check) => check.id === 'https-base-url')).toMatchObject({
       state: 'warn',
       blocking: false,
@@ -138,6 +151,24 @@ describe('durable installer progress and recovery', () => {
     await expect(store.read('installation-b')).rejects.toMatchObject({
       code: 'INSTALLATION_PROGRESS_INVALID',
     });
+  });
+
+  it('recovers an old installer lock only after its recorded process is no longer alive', async () => {
+    const root = await temporaryDirectory('scola-stale-lock-');
+    const service = new InstallationService(root);
+    await writeFile(
+      service.lock.path,
+      `${JSON.stringify({
+        token: 'stale-lock-token',
+        pid: 2_147_483_647,
+        acquiredAt: '2000-01-01T00:00:00.000Z',
+      })}\n`,
+      'utf8',
+    );
+
+    const handle = await service.lock.acquire();
+    expect(handle.metadata.token).not.toBe('stale-lock-token');
+    await handle.release();
   });
 });
 
